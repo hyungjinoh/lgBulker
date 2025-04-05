@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- local 전용 -->
+    <springProfile name="local">
+        <property name="LOG_PATH" value="D:/1.data_poc/logs"/>
+        <!-- 콘솔 로깅 설정 -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 파일 로깅 설정 -->
+        <appender name="FILE_LOCAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 매일 새로운 로그 파일 생성 -->
+                <fileNamePattern>D:/1.data_poc/logs/app-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 최대 보관 기간 (예: 30일) -->
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE_LOCAL"/>
+        </root>
+    </springProfile>
+
+    <!-- prod 전용 -->
+    <springProfile name="prod">
+        <property name="LOG_PATH" value="/data/poc/logs"/>
+
+        <!-- 콘솔 로깅 설정 -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 파일 로깅 설정 -->
+        <appender name="FILE_PROD" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 매일 새로운 로그 파일 생성 -->
+                <fileNamePattern>/data/poc/logs/app-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 최대 보관 기간 (예: 30일) -->
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+
+        <!-- 로깅 레벨 설정 -->
+        <root level="info">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE_PROD"/>
+        </root>
+
+    </springProfile>
+
+</configuration>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rayful.lgbulker.mapper.EmailMapper">
+
+    <select id="findAll" resultType="com.rayful.lgbulker.vo.LGEmailVo">
+        <![CDATA[
+        SELECT a.id
+             , CONCAT(DATE_FORMAT(a.release_dtm, '%Y-%m-%dT%H:%i:%s'), '_', 'jinhoh21@naver.com') as emid
+             , a.title                                                        as subject
+             , 'jinhoh21@naver.com'                                           as sender
+             , DATE_FORMAT(a.release_dtm, '%Y-%m-%dT%H:%i:%s')                as senddtm
+             , 'samuel@rayful.com'                                            as receiver
+             , a.introduction                                                 as body
+           , GROUP_CONCAT(CONCAT('D:\\1.data_poc\\attachments\\', b.attachname) ORDER BY b.attach_id SEPARATOR ', ') AS attaches
+--             , GROUP_CONCAT(CONCAT('/data/poc/attachments/', b.attachname) ORDER BY b.attach_id SEPARATOR ', ') AS attaches
+             , DATE_FORMAT(now(), '%Y-%m-%dT%H:%i:%s')                       AS idxdtm
+        FROM tb_email a
+                 LEFT JOIN
+             tb_attaches b ON a.id = b.attach_id
+--        WHERE a.id <= 15
+        WHERE a.id = 7
+        GROUP BY a.id, a.title, a.release_dtm, a.introduction
+        ]]>
+    </select>
+
+
+</mapper>

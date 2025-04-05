@@ -1,0 +1,56 @@
+plugins {
+	id 'org.springframework.boot' version '2.7.18'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'java'
+}
+
+
+group = 'com.rayful'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// 테스트 코드용
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.assertj:assertj-core'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+	implementation 'com.google.code.gson:gson:2.10.1'
+
+
+	// ✅ Elasticsearch REST Client (검색 기능 지원)
+	implementation 'org.elasticsearch.client:elasticsearch-rest-client:8.11.1'
+
+	implementation 'org.jsoup:jsoup:1.16.1' // 버전은 최신으로
+
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+	implementation 'mysql:mysql-connector-java:8.0.33' // 올바른 의존성
+
+	implementation 'org.jsoup:jsoup:1.16.1' // 버전은 최신으로
+
+	implementation 'com.sun.mail:javax.mail:1.6.2'  //MIME Check
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

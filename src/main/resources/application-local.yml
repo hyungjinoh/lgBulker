@@ -1,0 +1,54 @@
+spring:
+    main:
+        web-application-type: none
+        banner-mode: off
+    application:
+        name: lg
+    datasource:
+        url: jdbc:mysql://122.199.202.100:13306/movies
+        username: root
+        password: pass123#
+        driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    type-handlers-package: com.rayful.lgpoc.gathering.util
+    configuration:
+        map-underscore-to-camel-case: true
+
+logging:
+    level:
+        root: INFO
+#        root: DEBUG
+#        org.springframework.web: WARN
+    file:
+        name: D:/1.data_poc/logs/application.log
+
+
+########################## Application Specific Variables ##################################
+app:
+    paths:
+        input:
+            raw_emails: D:\1.data_poc\input\raw_emails            #(elm 파일), 대용량 메일 첨부 형식 (네이버 대용량 첨부링크)
+            emails: D:\1.data_poc\input\lg_emails                      # 이메일형식의 json 파일(파싱처리됨, by 소만사)
+            attaches: D:\1.data_poc\input\lg_attaches
+            download: D:\1.data_poc\input\download
+        output:
+            bulkfiles: D:\1.data_poc\output\bulkfiles
+            merged: D:\1.data_poc\output\lg_merged
+        attachments: D:\1.data_poc\attachments
+        synap_exe: D:\1.data_poc\synap_v4\snf_exe.exe
+
+    file:
+        timestamp: D:\1.data_poc\timestamp\last_executed.txt
+    batch:
+        size: 10
+
+elasticsearch:
+        bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
+        idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
+        auth: elastic:elastic
+
+
+
