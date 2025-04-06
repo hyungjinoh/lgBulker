@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rayful.lgbulker.mapper.FileMapper">
+    <resultMap id="AttachVoMap" type="com.rayful.lgbulker.vo.FileVO">
+        <result column="Mail_GUID" property="Mail_GUID"/>
+        <result column="File_GUID" property="File_GUID"/>
+        <result column="File_ContentPath" property="File_ContentPath"/>
+        <result column="File_Name" property="File_Name"/>
+        <result column="link_yn" property="link_yn"/>
+        <result column="File_Time" property="File_Time"/>
+        <result column="File_DownloadLink" property="File_DownloadLink"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="FileVO">
+        <![CDATA[
+        SELECT
+             b.id                                                                         as Mail_GUID
+             , CONCAT('attach_', b.id)                                                      as File_GUID
+             , '/data/poc/sourcedocs'                                                       as File_ContentPath
+             , b.attachname                                                                 as File_Name
+             , 'Y'                                                                          as link_yn
+            , DATE_FORMAT(now(), '%Y-%m-%dT%H:%i:%s')                as File_Time
+            , 'https://165.243.64.200/DLPCenter/logDownloadFile.down?fileID=1d7b6fef9163f46e747b84f33aceb860bc91f54f4d8f76475bf9223d185f9340cc5531f00ce50a8a9680b49261d42705d9a0d9729cb5452386893f65760d5ddf8772a1b59b8764a54a5f05bf6c28490bbefa39e550c5d850e78a5e3d35a175da29f23943f8753c3061f92ec6519a6935' as File_DownloadLink
+--      , CONCAT(DATE_FORMAT(a.release_dtm, '%Y-%m-%dT%H:%i:%s'), '_', 'samuel@rayful.com') as em_id
+        FROM tb_attaches b
+                 JOIN tb_email a
+                      ON b.attach_id = a.id
+        WHERE a.id < 11
+        ]]>
+    </select>
+</mapper>

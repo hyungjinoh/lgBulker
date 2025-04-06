@@ -3,16 +3,10 @@ package com.rayful.lgbulker.vo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.rayful.lgbulker.util.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 @Data
 @Builder
@@ -35,7 +29,7 @@ public class LGAttachVO {
   private String idxdtm;
   private String em_body;
 
-  private AttachFileVo attachFile;
+  private FileVO attachFile;
   private LGEmailVo email;
 
 

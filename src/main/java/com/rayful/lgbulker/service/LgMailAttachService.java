@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rayful.lgbulker.mapper.EmailMapper;
 import com.rayful.lgbulker.vo.BulkerLogVO;
 import com.rayful.lgbulker.util.LGAttachFileWriter;
-import com.rayful.lgbulker.vo.AttachFileVo;
+import com.rayful.lgbulker.vo.FileVO;
 import com.rayful.lgbulker.vo.LGAttachVO;
 import com.rayful.lgbulker.vo.LGEmailVo;
 import lombok.RequiredArgsConstructor;
@@ -95,15 +95,15 @@ public class LgMailAttachService {
       File attachDir = new File(ATTACHES_DIR);  //첨부파일 저장경로
       File[] files = attachDir.listFiles((dir, name) -> name.endsWith(".json"));
 
-      List<AttachFileVo> attachList = new ArrayList<>();
+      List<FileVO> fileVOList = new ArrayList<>();
 
       if (files != null) {
         for (File file : files) {
-          attachList = objectMapper.readValue(file, new TypeReference<List<AttachFileVo>>() {
+          fileVOList = objectMapper.readValue(file, new TypeReference<List<FileVO>>() {
           });
 
           //첨부기준으로 실행.
-          for (AttachFileVo attach : attachList) {
+          for (FileVO attach : fileVOList) {
             String mailGuid = attach.getMailGUID();
             LGEmailVo matchedMail = mailMap.get(mailGuid);
             matchedMailGuids.add(mailGuid);

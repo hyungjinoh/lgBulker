@@ -1,14 +1,14 @@
 package com.rayful.lgbulker.mapper;
 
-import com.rayful.lgbulker.vo.AttachVo;
+import com.rayful.lgbulker.vo.FileVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 @Mapper
-public interface AttachMapper {
+public interface FileMapper {
 
-  List<AttachVo> findAll();
+  List<FileVO> findAll();
 
 //
 //  @Insert("INSERT INTO movies (title, director, release_date) VALUES (#{title}, #{director}, #{releaseDate})")

@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttachFileVo {
+public class FileVO {
 
   @JsonProperty("File_AbnormalNested")
   private List<Object> fileAbnormalNested;
