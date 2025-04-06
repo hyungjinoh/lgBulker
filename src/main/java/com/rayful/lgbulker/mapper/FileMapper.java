@@ -1,6 +1,6 @@
 package com.rayful.lgbulker.mapper;
 
-import com.rayful.lgbulker.vo.FileVO;
+import com.rayful.lgbulker.vo.LGFileVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
-  List<FileVO> findAll();
+  List<LGFileVO> findAll();
 
 //
 //  @Insert("INSERT INTO movies (title, director, release_date) VALUES (#{title}, #{director}, #{releaseDate})")

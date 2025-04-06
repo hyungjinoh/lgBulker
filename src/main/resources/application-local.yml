@@ -31,12 +31,12 @@ app:
     paths:
         input:
             raw_emails: D:\1.data_poc\input\raw_emails            #(elm 파일), 대용량 메일 첨부 형식 (네이버 대용량 첨부링크)
-            emails: D:\1.data_poc\input\lg_emails                      # 이메일형식의 json 파일(파싱처리됨, by 소만사)
-            attaches: D:\1.data_poc\input\lg_attaches
+            emails: D:\1.data_poc\input\emails                      # 이메일형식의 json 파일(파싱처리됨, by 소만사)
+            files: D:\1.data_poc\input\files
             download: D:\1.data_poc\input\download
         output:
             bulkfiles: D:\1.data_poc\output\bulkfiles
-            merged: D:\1.data_poc\output\lg_merged
+            merged: D:\1.data_poc\output\merged
         attachments: D:\1.data_poc\attachments
         synap_exe: D:\1.data_poc\synap_v4\snf_exe.exe
 

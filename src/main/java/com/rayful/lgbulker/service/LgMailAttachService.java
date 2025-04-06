@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rayful.lgbulker.mapper.EmailMapper;
 import com.rayful.lgbulker.vo.BulkerLogVO;
 import com.rayful.lgbulker.util.LGAttachFileWriter;
-import com.rayful.lgbulker.vo.FileVO;
+import com.rayful.lgbulker.vo.LGFileVO;
 import com.rayful.lgbulker.vo.LGAttachVO;
 import com.rayful.lgbulker.vo.LGEmailVo;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class LgMailAttachService {
   private int BATCH_SIZE;
   @Value("${app.paths.input.emails}")
   private String EMAILS_DIR;          //가. 처리대상 json 형식 이메일 파일들 경로
-  @Value("${app.paths.input.attaches}")
+  @Value("${app.paths.input.files}")
   private String ATTACHES_DIR;     //나. 처리대상 : 가. 를 첨부기준 json 형식으로 저장한 결과
 
   @Value("${app.paths.output.merged}")
@@ -95,15 +95,15 @@ public class LgMailAttachService {
       File attachDir = new File(ATTACHES_DIR);  //첨부파일 저장경로
       File[] files = attachDir.listFiles((dir, name) -> name.endsWith(".json"));
 
-      List<FileVO> fileVOList = new ArrayList<>();
+      List<LGFileVO> fileVOList = new ArrayList<>();
 
       if (files != null) {
         for (File file : files) {
-          fileVOList = objectMapper.readValue(file, new TypeReference<List<FileVO>>() {
+          fileVOList = objectMapper.readValue(file, new TypeReference<List<LGFileVO>>() {
           });
 
           //첨부기준으로 실행.
-          for (FileVO attach : fileVOList) {
+          for (LGFileVO attach : fileVOList) {
             String mailGuid = attach.getMailGUID();
             LGEmailVo matchedMail = mailMap.get(mailGuid);
             matchedMailGuids.add(mailGuid);
@@ -183,8 +183,8 @@ public class LgMailAttachService {
 
       try (BufferedWriter writer = new BufferedWriter(new FileWriter(bulkFile))) {
         for (LGAttachVO attach : attachList) {
-          String _id = attach.getAttach_id();
-          String meta = String.format("{\"index\": {\"_index\": \"idx_email\", \"_id\": \"%s\"}}", (_id.contains("_attach_") ? _id : attach.getEm_id()));
+          String key = attach.getKey();
+          String meta = String.format("{\"index\": {\"_index\": \"idx_email\", \"_id\": \"%s\"}}", key);
           writer.write(meta);
           writer.newLine();
           writer.write(objectMapper.writeValueAsString(objectMapper.valueToTree(attach)));

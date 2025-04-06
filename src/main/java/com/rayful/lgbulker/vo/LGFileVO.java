@@ -1,21 +1,25 @@
 package com.rayful.lgbulker.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileVO {
+public class LGFileVO {
 
+  @Builder.Default
   @JsonProperty("File_AbnormalNested")
-  private List<Object> fileAbnormalNested;
+  private List<String> fileAbnormalNested = new ArrayList<>();
 
   @JsonProperty("File_GUID")
   private String fileGUID;

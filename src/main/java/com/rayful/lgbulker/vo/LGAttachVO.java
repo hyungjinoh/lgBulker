@@ -29,7 +29,7 @@ public class LGAttachVO {
   private String idxdtm;
   private String em_body;
 
-  private FileVO attachFile;
+  private LGFileVO attachFile;
   private LGEmailVo email;
 
 
@@ -47,14 +47,14 @@ public class LGAttachVO {
 
     // 대용량에서 첨부여부
     this.link_yn = "";
-    this.em_id = email.getMailGUID();
+    this.em_id = (email != null) ? email.getMailGUID() : null;
     this.subject = (email != null) ? email.getMailSubject() : null;
-    this.sender = email.getMailFrom();
+    this.sender = (email != null) ? email.getMailFrom() : null;
 //    this.senddtm = Utils.convertDateFormat(email.getMailSendTime());
-    this.senddtm = email.getMailSendTime().replace(" ", "T");
-    this.receiver = email.getMailTo();
+    this.senddtm = (email != null) ? email.getMailSendTime().replace(" ", "T") : null;
+    this.receiver = (email != null) ?  email.getMailTo() : null;
 //    this.idxdtm = "";
-    this.em_body = email.getMailClientContentPlain();
+    this.em_body = (email != null) ? email.getMailClientContentPlain() : null;
 
   }
 

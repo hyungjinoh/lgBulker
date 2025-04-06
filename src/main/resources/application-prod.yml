@@ -31,10 +31,11 @@ app:
         input:
             raw_emails: /data/poc/bulker/input/raw_emails            #(elm 파일), 대용량 메일 첨부 형식 (네이버 대용량 첨부링크)
             emails: /data/poc/bulker/input/emails            # 이메일형식의 json 파일(파싱처리됨, by 소만사)
+            files: /data/poc/bulker/input/files
             download: /data/poc/bulker/input/download
         output:
             bulkfiles: /data/poc/bulker/output/bulkfiles
-            attaches: /data/poc/bulker/output/attaches
+            merged: /data/poc/bulker/output/merged
         attachments: /data/poc/attachments
         synap_exe: /data/poc/bulker/synap/v4/snf_exe
 
