@@ -1,6 +1,6 @@
 package com.rayful.lgbulker;
 
-import com.rayful.lgbulker.service.LgMailAttachService;
+import com.rayful.lgbulker.service.MailAttachService;
 import com.rayful.lgbulker.service.IndexService;
 import com.rayful.lgbulker.util.Utils;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import static com.rayful.lgbulker.util.FileUtils.deleteDirectoryRecursively;
 @SpringBootApplication
 @RequiredArgsConstructor
 public class LgBulkerApplication implements ApplicationRunner {
-  private final LgMailAttachService lgMailAttachService;
+  private final MailAttachService mailAttachService;
   private final IndexService indexService;
 
   @Value("${app.paths.input.emails}")
@@ -81,12 +81,12 @@ public class LgBulkerApplication implements ApplicationRunner {
         log.info("====================데이터 로드 시작================");
         clearWorkingDir();
 
-        lgMailAttachService.load();
+        mailAttachService.load();
         log.info("====================데이터 로드 완료===============");
 
         Thread.sleep(3000);
         log.info("====================bulk file 생성 시작================");
-        lgMailAttachService.createBulkFiles();
+        mailAttachService.createBulkFiles();
 
         log.info("====================bulk file 생성완료 ================");
 

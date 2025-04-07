@@ -1,4 +1,4 @@
-package com.rayful.lgbulker.vo;
+package com.rayful.lgbulker.module;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

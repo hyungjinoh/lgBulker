@@ -42,7 +42,7 @@ app:
 
     file:
         timestamp: D:\1.data_poc\timestamp\last_executed.txt
-    batch:
+    bulk:
         size: 10
 
 elasticsearch:

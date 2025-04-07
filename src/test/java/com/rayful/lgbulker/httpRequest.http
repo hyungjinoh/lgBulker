@@ -1,0 +1,22 @@
+### Send POST request with json body
+POST https://ocr.edentns.ai/document/general
+Content-Type: application/json
+
+{
+  "version": "1.0",
+  "requestId": "req01",
+  "timestamp": 0,
+  "images": [
+    {
+      "format": "pdf",
+      "data": "string",
+      "name": "string",
+      "option": {
+        "pageRange": [
+          0
+        ]
+      }
+    }
+  ],
+  "details": "string"
+}

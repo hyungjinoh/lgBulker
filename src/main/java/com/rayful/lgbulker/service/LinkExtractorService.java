@@ -2,7 +2,7 @@ package com.rayful.lgbulker.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rayful.lgbulker.vo.EmailDto;
+import com.rayful.lgbulker.module.EmailDto;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

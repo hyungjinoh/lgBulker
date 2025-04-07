@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LGAttachVO {
+public class LGFileMailVO {
   private String key; // fileGUID_mailGUID 또는 unknown_mailGUID
   //////////////////////////
   private String attach_id;
   private String attach_path;
+  private String attach_parent;
+  private String from_zipfile;
   private String attach_name;
   private String attach_body;
   private String attach_exist;
@@ -44,7 +46,6 @@ public class LGAttachVO {
     //첨부존재여부
     this.attach_exist = (attachFile != null) ? "Y" : "N";
 
-
     // 대용량에서 첨부여부
     this.link_yn = "";
     this.em_id = (email != null) ? email.getMailGUID() : null;
@@ -67,6 +68,4 @@ public class LGAttachVO {
       return "JSON 변환 실패: " + e.getMessage();
     }
   }
-
-
 }
