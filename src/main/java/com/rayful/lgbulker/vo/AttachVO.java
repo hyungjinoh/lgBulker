@@ -1,28 +1,18 @@
 package com.rayful.lgbulker.vo;
 
+import lombok.*;
+
+
+@ToString
+@Builder
+@Data
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class AttachVO {
   private String fileName;
   private String filePath;
   private long fileSize;
+  private String fileExist;
 
-  public AttachVO(String fileName, String filePath, long fileSize) {
-    this.fileName = fileName;
-    this.filePath = filePath;
-    this.fileSize = fileSize;
-  }
-
-  // Getter & Setter
-  public String getFileName() { return fileName; }
-  public String getFilePath() { return filePath; }
-  public long getFileSize() { return fileSize; }
-
-  @Override
-  public String toString() {
-    return "AttachVO{" +
-            "fileName='" + fileName + '\'' +
-            ", filePath='" + filePath + '\'' +
-            ", fileSize=" + fileSize +
-            '}';
-  }
 }
 

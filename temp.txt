@@ -1,19 +1,82 @@
-totalResult = {ArrayList@8064}  size = 3
- 0 = {LGFileMailVO@8070} "LGFileMailVO(key=m4_attach_1, attach_id=m4_attach_1, attach_path=D:\1.data_poc\attachments\압축문서.zip_unzipped\(65차)_비개발자를_위한_Git과_GitHub_Page_블로그_만들기_세미나_가이드.pdf, attach_name=(65차)_비개발자를_위한_Git과_GitHub_Page_블로그_만들기_세미나_가이드.pdf, attach_body=, attach_exist=Y, link_yn=, em_id=m4, subject=명량, sender=jinhoh21@naver.com, senddtm=2020-07-30T22:06:53, receiver=null, idxdtm=null, em_body=1597년 임진왜란 6년, 오랜 전쟁으로 인해 혼란이 극에 달한 조선. 무서운 속도로 한양으로 북상하는 왜군에 의해 국가존망의 위기에 처하자 누명을 쓰고 파면 당했던 이순신 장군(최민식)이 삼도수군통제사로 재임명된다. 하지만 그에게 남은 건 전의를 상실한 병사와 두려움에 가득 찬 백성, 그리고 12척의 배 뿐. 마지막 희망이었던 거북선마저 불타고 잔혹한 성격과 뛰어난 지략을 지닌 용병 구루지마(류승룡)가 왜군 수장으로 나서자 조선은 더욱 술렁인다. 330척에 달하는 왜군의 배가 속속 집결하고 압도적인 수의 열세에 모두가 패배를 직감하는 순간, 이순신 장군은 단 12척의 배를 이끌고 명량 바다를 향해 나서는데…! 12척의 조선 vs 330척의 왜군 역사를 바꾼 위대한 전쟁이 시작된다!, attachFile=LGFileVO(fileAbnormalNested=[], fileGUID=f14, fileName=압축문서.zip, fileSize=null, mailGUID=m4, fileContentPath=D:\1.data_poc\attachments\압축문서.zip, fileTime=2025-04-07T01:44:55, fileDownloadLink=https://165.243.64.200/DLPCe"
-  key = "m4_attach_1"
-  attach_id = "m4_attach_1"
-  attach_path = "D:\1.data_poc\attachments\압축문서.zip_unzipped\(65차)_비개발자를_위한_Git과_GitHub_Page_블로그_만들기_세미나_가이드.pdf"
-  attach_name = "(65차)_비개발자를_위한_Git과_GitHub_Page_블로그_만들기_세미나_가이드.pdf"
-  attach_body = ""
-  attach_exist = "Y"
-  link_yn = ""
-  em_id = "m4"
-  subject = "명량"
-  sender = "jinhoh21@naver.com"
-  senddtm = "2020-07-30T22:06:53"
-  receiver = null
-  idxdtm = null
-  em_body = "1597년 임진왜란 6년, 오랜 전쟁으로 인해 혼란이 극에 달한 조선. 무서운 속도로 한양으로 북상하는 왜군에 의해 국가존망의 위기에 처하자 누명을 쓰고 파면 당했던 이순신 장군(최민식)이 삼도수군통제사로 재임명된다. 하지만 그에게 남은 건 전의를 상실한 병사와 두려움에 가득 찬 백성, 그리고 12척의 배 뿐. 마지막 희망이었던 거북선마저 불타고 잔혹한 성격과 뛰어난 지략을 지닌 용병 구루지마(류승룡)가 왜군 수장으로 나서자 조선은 더욱 술렁인다. 330척에 달하는 왜군의 배가 속속 집결하고 압도적인 수의 열세에 모두가 패배를 직감하는 순간, 이순신 장군은 단 12척의 배를 이끌고 명량 바다를 향해 나서는데…! 12척의 조선 vs 330척의 왜군 역사를 바꾼 위대한 전쟁이 시작된다!"
-  attachFile = {LGFileVO@8630} "LGFileVO(fileAbnormalNested=[], fileGUID=f14, fileName=압축문서.zip, fileSize=null, mailGUID=m4, fileContentPath=D:\1.data_poc\attachments\압축문서.zip, fileTime=2025-04-07T01:44:55, fileDownloadLink=https://165.243.64.200/DLPCenter/logDownloadFile.down?fileID=1d7b6fef9163f46e747b84f33aceb860bc91f54f4d8f76475bf9223d185f9340cc5531f00ce50a8a9680b49261d42705d9a0d9729cb5452386893f65760d5ddf8772a1b59b8764a54a5f05bf6c28490bbefa39e550c5d850e78a5e3d35a175da29f23943f8753c3061f92ec6519a6935)"
-  email = {LGEmailVo@8631} "LGEmailVo(mailDestGroup=null, mailType=null, mailClientContentPlain=1597년 임진왜란 6년, 오랜 전쟁으로 인해 혼란이 극에 달한 조선. 무서운 속도로 한양으로 북상하는 왜군에 의해 국가존망의 위기에 처하자 누명을 쓰고 파면 당했던 이순신 장군(최민식)이 삼도수군통제사로 재임명된다. 하지만 그에게 남은 건 전의를 상실한 병사와 두려움에 가득 찬 백성, 그리고 12척의 배 뿐. 마지막 희망이었던 거북선마저 불타고 잔혹한 성격과 뛰어난 지략을 지닌 용병 구루지마(류승룡)가 왜군 수장으로 나서자 조선은 더욱 술렁인다. 330척에 달하는 왜군의 배가 속속 집결하고 압도적인 수의 열세에 모두가 패배를 직감하는 순간, 이순신 장군은 단 12척의 배를 이끌고 명량 바다를 향해 나서는데…! 12척의 조선 vs 330척의 왜군 역사를 바꾼 위대한 전쟁이 시작된다!, mailSenderUID=null, mailCIP=null, mailTo=null, mailDestName=null, mailPolicyName=null, mailCPort=null, mailCC=null, mailUID=null, mailGUID=m4, mailFrom=jinhoh21@naver.com, mailViewType=null, mailFileCount=null, mailSIP=null, mailTag=null, mailPolicyAction=null, mailSenderDID=null, mailSPort=null, mailReceiverUID=null, mailDestGuid=null, mailCategoryType=null, mailTotalSize=null, mailHeader=null, mailSrcGuid=null, mailSubject=명량, mailServerContentPlain=null, mailFileList=null, mailSendTime=2020-07-30T22:06:53, mailServerContentDec=null, ma"
- 1 = {LGFileMailVO@8071} "LGFileMailVO(key=m4_attach_2, attach_id=m4_attach_2, attach_path=D:\1.data_poc\attachments\압축문서.zip_unzipped\(검수확인서)_골프존커머스 온라인 통합 프로젝트_중간_레이풀시스템_230426.docx, attach_name=(검수확인서)_골프존커머스 온라인 통합 프로젝트_중간_레이풀시스템_230426.docx, attach_body=, attach_exist=Y, link_yn=, em_id=m4, subject=명량, sender=jinhoh21@naver.com, senddtm=2020-07-30T22:06:53, receiver=null, idxdtm=null, em_body=1597년 임진왜란 6년, 오랜 전쟁으로 인해 혼란이 극에 달한 조선. 무서운 속도로 한양으로 북상하는 왜군에 의해 국가존망의 위기에 처하자 누명을 쓰고 파면 당했던 이순신 장군(최민식)이 삼도수군통제사로 재임명된다. 하지만 그에게 남은 건 전의를 상실한 병사와 두려움에 가득 찬 백성, 그리고 12척의 배 뿐. 마지막 희망이었던 거북선마저 불타고 잔혹한 성격과 뛰어난 지략을 지닌 용병 구루지마(류승룡)가 왜군 수장으로 나서자 조선은 더욱 술렁인다. 330척에 달하는 왜군의 배가 속속 집결하고 압도적인 수의 열세에 모두가 패배를 직감하는 순간, 이순신 장군은 단 12척의 배를 이끌고 명량 바다를 향해 나서는데…! 12척의 조선 vs 330척의 왜군 역사를 바꾼 위대한 전쟁이 시작된다!, attachFile=LGFileVO(fileAbnormalNested=[], fileGUID=f14, fileName=압축문서.zip, fileSize=null, mailGUID=m4, fileContentPath=D:\1.data_poc\attachments\압축문서.zip, fileTime=2025-04-07T01:44:55, fileDownloadLink=https://165.243.64.200/DLPCenter/l"
+ {
+  "key" : "f1_m1",
+  "attach_id" : "f1_m1",
+  "attach_path" : "D:\\1.data_poc\\attachments\\(강의자료)_스프링_부트를_이용한__웹서비스_개발.pdf",
+  "attach_parent" : "",
+  "from_zipfile" : "N",
+  "attach_name" : "(강의자료)_스프링_부트를_이용한__웹서비스_개발.pdf",
+  "attach_exist" : "Y",
+  "link_yn" : "",
+  "em_id" : "m1",
+  "subject" : "명량",
+  "sender" : "jinhoh21@naver.com",
+  "senddtm" : "2020-07-30T22:06:53",
+  "receiver" : null,
+  "idxdtm" : null,
+  "em_body" : "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791198752406.jpg  https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791194033585.jpg  1597년 임진왜란 6년, 오랜 전쟁으로 인해 혼란이 극에 달한 조선. 무서운 속도로 한양으로 북상하는 왜군에 의해 국가존망의 위기에 처하자 누명을 쓰고 파면 당했던 이순신 장군(최민식)이 삼도수군통제사로 재임명된다. 하지만 그에게 남은 건 전의를 상실한 병사와 두려움에 가득 찬 백성, 그리고 12척의 배 뿐. 마지막 희망이었던 거북선마저 불타고 잔혹한 성격과 뛰어난 지략을 지닌 용병 구루지마(류승룡)가 왜군 수장으로 나서자 조선은 더욱 술렁인다. 330척에 달하는 왜군의 배가 속속 집결하고 압도적인 수의 열세에 모두가 패배를 직감하는 순간, 이순신 장군은 단 12척의 배를 이끌고 명량 바다를 향해 나서는데…! 12척의 조선 vs 330척의 왜군 역사를 바꾼 위대한 전쟁이 시작된다!",
+  "bodyLinks" : [ "D:\\1.data_poc\\input\\download\\9791198752406.jpg", "D:\\1.data_poc\\input\\download\\9791194033585.jpg" ],
+ }
+
+ <<네이버메일 첨부다운로드 링크>>
+ https://bigfile.mail.naver.com/download?fid=g/FcWrC516cwKCYZHquZKxvXFCYZKAU9KAtmaAurFxvmFIYwFqtrFqurKqvlHrMdKoKZFzFSaA04M4udKqtmMqUdaAgqKqbqpxbrKoMr
+
+
+======================================================================================
+ case1>
+    본문에 bodylink는 있는데,  첨부파일이 압축파일인경우   ???
+======================================================================================
+
+
+4  (강의자료)_스프링_부트를_이용한__웹서비스_개발.pdf
+5   (별첨자료)_윈도우즈_환경에서_스프링_부트_개발환경_구축하기.pdf  0
+1.txt
+4   자바를다루는기술_VOL2_15장.pptx
+3   자바를다루는기술_VOL2_15장.pptx    중복...
+1    제 12장.pdf
+
+-------첨부파일--------
+ "attach_name" : "자바를다루는기술_VOL2_15장.zip",
+
+
+
+==========================================================>
+
+
+!!최대로 케이스를 나눠처리하라!!
+
+FileMailService 클래스 설계
+A, 파일없음-객체생성 및 처리,
+    ->결과A객체
+B, 일반파일, 링크 없음-객체생성 및 처리
+    ->결과B객체
+C, 압축파일, 링크 없음
+     -압축파일 출고, 풀린 파일수만큼 객체생성
+     -원본 압축파일은 객체에서 제거
+     -parent 에는 압축파일명, fromzip은 Y
+     -최종 객체 merge
+      ->결과C객체
+D, 일반파일, 링크 있음
+     - 일반파일, 객체생성
+     - 링크갯수 만큼 객체생성
+     - 각 객체에서 링크삭제
+     - fromlink는 Y
+     - 객체가 C타입이면 C타입처리 로직수행
+     - 최종 객체 merge
+     ->결과D객체
+E, 파일없음, 링크있음
+    - 링크갯수만큼 객체생성
+    - 각 객체에서 링크삭제
+    - 객체가 B타입이면, B타입 처리로직수행
+    - 객체가 C타입이면, C타입 처리로직 수행
+    - 최종 객체 merge
+    ->결과E객체
+F, 압축파일, 링크 있음
+     - 압축파일없는 링크객체 생성
+     - E타입 처리로직수행 -> E1 merge객체
+     - 링크없는 압축파일만 있는 객체생성
+     - 압축파일, 링크없는 객체 생성
+     - C타입 처리로직 수행 -> E2 객체생성
+     - E1, E2 객체 머지
+     ->결과F객체
+
+최종 결과All 객체 생성(결과A~결과F 머지)

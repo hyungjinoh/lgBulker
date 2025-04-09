@@ -12,8 +12,8 @@
              , DATE_FORMAT(a.release_dtm, '%Y-%m-%dT%H:%i:%s')                as Mail_SendTime
              , 'samuel@rayful.com'                                            as receiver
              , a.introduction                                                 as mailClientContentPlain
-           , GROUP_CONCAT(CONCAT('D:\\1.data_poc\\attachments\\', b.attachname) ORDER BY b.movie_id SEPARATOR ', ') AS attaches
---             , GROUP_CONCAT(CONCAT('/data/poc/attachments/', b.attachname) ORDER BY b.movie_id SEPARATOR ', ') AS attaches
+--           , GROUP_CONCAT(CONCAT('D:\\1.data_poc\\attachments\\', b.attachname) ORDER BY b.movie_id SEPARATOR ', ') AS attaches
+             , GROUP_CONCAT(CONCAT('/data/poc/attachments/', b.attachname) ORDER BY b.movie_id SEPARATOR ', ') AS attaches
 --             , DATE_FORMAT(now(), '%Y-%m-%dT%H:%i:%s')                       AS idxdtm
         FROM tb_email a
                  LEFT JOIN

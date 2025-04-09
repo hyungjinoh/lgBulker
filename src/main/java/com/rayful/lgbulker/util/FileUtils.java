@@ -51,7 +51,7 @@ public class FileUtils {
 
   }
 
-  private static String getFileExtension(String fileName) {
+  public static String getFileExtension(String fileName) {
     int idx = fileName.lastIndexOf('.');
     return (idx != -1) ? fileName.substring(idx) : "";
   }

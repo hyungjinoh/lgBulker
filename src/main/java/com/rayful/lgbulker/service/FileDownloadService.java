@@ -1,6 +1,11 @@
 package com.rayful.lgbulker.service;
 
 import com.rayful.lgbulker.vo.AttachVO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,13 +21,15 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Service
+@RequiredArgsConstructor
 public class FileDownloadService {
 
-  private static final String DOWNLOAD_DIR = "downloads/";
-  private static final Pattern FILENAME_PATTERN = Pattern.compile("filename\\*?=([^;]+)");
+  @Value("${app.paths.input.download}")
+  private String DOWNLOAD_DIR;
 
-  public List<AttachVO> downloadFiles(String[] urls) throws IOException {
-    List<AttachVO> attachList = new ArrayList<>();
+  public List<String> downloadFiles(String[] urls) throws IOException {
+    List<String> attachList = new ArrayList<>();
 
     Path downloadDir = Path.of(DOWNLOAD_DIR);
     if (!Files.exists(downloadDir)) {
@@ -45,14 +52,23 @@ public class FileDownloadService {
           String contentDisposition = connection.getHeaderField("Content-Disposition");
           String fileName = getFileNameFromHeaderOrUrl(contentDisposition, urlString);
 
-          Path targetPath = downloadDir.resolve(fileName);
+          // 다운로드할 파일이 이미지, 오피스, pdf, hwp, zip 인경우에만 다운로드 수행함.
+          if (fileName.endsWith(".doc") || fileName.endsWith(".docx") || fileName.endsWith(".ppt")
+                  || fileName.endsWith(".pptx") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx")
+                  || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")
+                  || fileName.endsWith(".tiff ") || fileName.endsWith(".hwp") || fileName.endsWith(".zip")
+                  || fileName.endsWith(".pdf")) {
 
-          try (InputStream inputStream = connection.getInputStream()) {
-            Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            Path targetPath = downloadDir.resolve(fileName);
+
+            try (InputStream inputStream = connection.getInputStream()) {
+              Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            long fileSize = Files.size(targetPath);
+            attachList.add(targetPath.toString());
+
           }
-
-          long fileSize = Files.size(targetPath);
-          attachList.add(new AttachVO(fileName, targetPath.toAbsolutePath().toString(), fileSize));
         } else {
           System.err.println("응답 오류: " + urlString + " - " + responseCode);
         }
@@ -106,9 +122,7 @@ public class FileDownloadService {
       String decoded = URLDecoder.decode(url, "UTF-8");
       String[] parts = decoded.split("[/\\\\?]");
       String last = parts[parts.length - 1];
-      return (last.isEmpty() || last.length() > 100)
-              ? UUID.randomUUID() + ".bin"
-              : sanitizeFilename(last);
+      return (last.isEmpty() || last.length() > 100) ? UUID.randomUUID() + ".bin" : sanitizeFilename(last);
     } catch (Exception e) {
       return UUID.randomUUID() + ".bin";
     }

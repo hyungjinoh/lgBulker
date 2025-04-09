@@ -41,8 +41,8 @@ app:
 
     file:
         timestamp: /data/poc/bulker/timestamp/last_executed.txt
-    batch:
-        size: 10
+    bulk:
+        size: 100
 
 elasticsearch:
         bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk

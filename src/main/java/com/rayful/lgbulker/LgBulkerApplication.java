@@ -31,31 +31,24 @@ public class LgBulkerApplication implements ApplicationRunner {
 
   @Value("${app.paths.input.emails}")
   private String EMAILS_DIR;
-
   @Value("${app.paths.output.merged}")
   private String MERGED_DIR;
-
   @Value("${app.paths.output.bulkfiles}")
   private String BULK_DIR;
 
   @Value("${app.file.timestamp}")
   private String TIMESTAMP_FILE;
-
   @Value("${app.paths.input.raw_emails}")
   private String RAWEMAILS_DIR;
-
   @Value("${app.paths.input.emails}")
   private String OUTPUT_DIR;
 
   private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
   private final String CURRENT_TIME = LocalDateTime.now().format(FORMATTER);
-
 
   public static void main(String[] args) {
 
     SpringApplication app = new SpringApplication(LgBulkerApplication.class);
-
     // 웹 서버 비활성화 (CLI 모드)
     app.setWebApplicationType(WebApplicationType.NONE);
     app.run(args);
@@ -84,13 +77,13 @@ public class LgBulkerApplication implements ApplicationRunner {
         mailAttachService.load();
         log.info("====================데이터 로드 완료===============");
 
-        Thread.sleep(3000);
+        Thread.sleep(2000);
         log.info("====================bulk file 생성 시작================");
         mailAttachService.createBulkFiles();
 
         log.info("====================bulk file 생성완료 ================");
 
-        Thread.sleep(3000);
+        Thread.sleep(2000);
         log.info("====================ES에 색인요청 시작================");
         indexService.doIndexing();
 

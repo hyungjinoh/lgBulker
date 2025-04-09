@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -30,6 +32,8 @@ public class LGFileMailVO {
   private String receiver;
   private String idxdtm;
   private String em_body;
+  private List<String> bodyLinks;
+//  private String from_bodylink;
 
   private LGFileVO attachFile;
   private LGEmailVo email;

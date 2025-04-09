@@ -16,6 +16,10 @@ import java.io.IOException;
 import java.util.List;
 
 
+/***
+ * 테스트 클래스에서 데이터 내려받기 위해 사용하는 vo는  com.rayful.lgbulker.vo 패키지 아래의 클래스를 사용한다.
+ */
+
 @ActiveProfiles("local")
 @SpringBootTest
 class CreateMailAttachTest {
@@ -27,7 +31,7 @@ class CreateMailAttachTest {
     private FileMapper fileMapper;
 
     // --- 설정 값 주입 ---
-    @Value("${app.batch.size}")
+    @Value("${app.bulk.size}")
     private int BATCH_SIZE;
     @Value("${app.paths.input.emails}")
     private String EMAILS_DIR;          //가. 처리대상 json 형식 이메일 파일들 경로
