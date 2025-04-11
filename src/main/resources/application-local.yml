@@ -50,5 +50,12 @@ elasticsearch:
         idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
         auth: elastic:elastic
 
+ocr:
+    edentns:
+        ocr_api_url: https://ocr.edentns.ai/document/general
+    output_path:
+        image: D:\1.data_poc\output\synap\image
+        text: D:\1.data_poc\output\synap\text
+
 
 

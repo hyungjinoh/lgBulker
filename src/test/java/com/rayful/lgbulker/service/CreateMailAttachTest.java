@@ -8,6 +8,8 @@ import com.rayful.lgbulker.vo.LGEmailVo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -19,7 +21,7 @@ import java.util.List;
 /***
  * 테스트 클래스에서 데이터 내려받기 위해 사용하는 vo는  com.rayful.lgbulker.vo 패키지 아래의 클래스를 사용한다.
  */
-
+//@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @ActiveProfiles("local")
 @SpringBootTest
 class CreateMailAttachTest {

@@ -48,6 +48,11 @@ elasticsearch:
         bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
         idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
         auth: elastic:elastic
-
+ocr:
+    edentns:
+        ocr_api_url: https://ocr.edentns.ai/document/general
+    output_path:
+        image: /data/poc/bulker/output/synap/image
+        text: /data/poc/bulker/output/synap/text
 
 

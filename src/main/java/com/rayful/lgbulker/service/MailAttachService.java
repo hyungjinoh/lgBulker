@@ -53,6 +53,8 @@ public class MailAttachService {
   private final BulkFileWriter bulkFileWriter;
   private final BodyParserService bodyParserService;
   private final FileDownloadService fileDownloadService;
+  //ocr
+  private final EmailAttachmentProcessService emailAttachmentProcessService;
 
   //로그 수집위해 사용.
   BulkerLogVO bulkerLogVO = new BulkerLogVO();
@@ -124,11 +126,14 @@ public class MailAttachService {
       /***
        * 리스트를 맵으로 변환, 서차장이 파일 첨부파일처리, OCR 처리 하는 부분
        */
-      List<Map<String, Object>> finalMapList = convertToMapList(finalResultList);
+      List<Map<String, Object>> convertedMapList = convertToMapList(finalResultList);
 
 
       //사이냅 필터처리, 이미지 처리 등등.... 부분  -- 오형진
-      enrichAttachBodies(finalMapList);
+//      enrichAttachBodies(convertedMapList);
+
+      List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedMapList);
+
 
       //벌크파일 생성호출
       bulkFileWriter.writeAsBulkJsonFiles(finalMapList, MERGED_DIR);
