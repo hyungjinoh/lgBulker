@@ -1,0 +1,44 @@
+*********************************
+Rayful 테스트 서버, Ubuntu 22
+*********************************
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils -
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils -             작업내용 요약
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - ---------------------------------------------------------------
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - # Index Request Summary #
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Bulk File Count] 1
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Index Request] Success: 74
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - ---------------------------------------------------------------
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - # Index Response Summary #
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Response] Total: 74
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Created: 0
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Updated: 74
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Deleted: 0
+2025-04-10 14:23:36 [main] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 14:23:36 [main] INFO  c.r.lgbulker.LgBulkerApplication - ====================ES에 색인요청 완료 ================
+2025-04-10 14:23:36 [main] INFO  c.r.lgbulker.LgBulkerApplication - ------------------------------------------
+2025-04-10 14:23:36 [main] INFO  c.r.lgbulker.LgBulkerApplication -  Bulker End (00:16:01)
+2025-04-10 14:23:36 [main] INFO  c.r.lgbulker.LgBulkerApplication - ------------------------------------------
+
+*********************************
+Rayful 테스트 서버, Windows 11
+*********************************
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils -             작업내용 요약
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - ---------------------------------------------------------------
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - # Index Request Summary #
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Bulk File Count] 1
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Index Request] Success: 74
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - ---------------------------------------------------------------
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - # Index Response Summary #
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Response] Total: 74
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Created: 0
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Updated: 74
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - - [Engine Resposne] Deleted: 0
+2025-04-10 13:58:19 [restartedMain] INFO  com.rayful.lgbulker.util.BulkerUtils - ===============================================================================
+2025-04-10 13:58:19 [restartedMain] INFO  c.r.lgbulker.LgBulkerApplication - ====================ES에 색인요청 완료 ================
+2025-04-10 13:58:19 [restartedMain] INFO  c.r.lgbulker.LgBulkerApplication - ------------------------------------------
+2025-04-10 13:58:19 [restartedMain] INFO  c.r.lgbulker.LgBulkerApplication -  Bulker End (00:24:20)
+2025-04-10 13:58:19 [restartedMain] INFO  c.r.lgbulker.LgBulkerApplication - ------------------------------------------
