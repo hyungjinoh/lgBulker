@@ -1,0 +1,88 @@
+package com.rayful.lgbulker.transform;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.jupiter.api.Test;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+public class True_Json_Email_MakerTest {
+
+    @Test
+    public void convertConcatenatedJsonToJsonArrayFile() throws IOException {
+        File inputFile = new File("src/test/resources/2025-04-17_mail.json");
+        File outputFile = new File("src/test/resources/2025-04-17_mail_true.json");
+
+
+        StringBuilder jsonText = new StringBuilder();
+
+        // 파일 전체를 문자열로 읽음
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(inputFile), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonText.append(line.trim());
+            }
+        }
+
+        // 연속된 JSON 오브젝트 분리
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        int depth = 0;
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < jsonText.length(); i++) {
+            char ch = jsonText.charAt(i);
+            if (ch == '{') depth++;
+            if (depth > 0) current.append(ch);
+            if (ch == '}') {
+                depth--;
+                if (depth == 0) {
+                    String oneJson = current.toString();
+                    Map<String, Object> map = mapper.readValue(oneJson, Map.class);
+
+                    // ✅ 문자열 "null"을 실제 null 로 변환 (Mail_AbnormalNested 키에 한정)
+                    Object abnormalValue = map.get("Mail_AbnormalNested");
+                    if ("null".equals(abnormalValue)) {
+                        map.put("Mail_AbnormalNested", null);
+                    }
+
+                    // ✅ Mail_GUID 정제
+                    Object mailGuid = map.get("Mail_GUID");
+                    if (mailGuid instanceof String) {
+                        String sanitized = sanitizeMailGuidForPath((String) mailGuid);
+                        map.put("Mail_GUID", sanitized);
+                    }
+
+
+                    resultList.add(map);
+                    current.setLength(0); // 초기화
+                }
+            }
+        }
+
+        // 예쁘게 JSON 배열로 저장
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
+            mapper.writeValue(writer, resultList);
+        }
+
+        System.out.println("✅ 변환 완료 → " + outputFile.getAbsolutePath());
+    }
+
+    public static String sanitizeMailGuidForPath(String mailGuid) {
+        if (mailGuid == null) return null;
+
+        return mailGuid
+                .replaceAll("[\\\\/:*?\"<>|]", "_")   // 파일 금지 문자 → "_"
+                .replaceAll("@", "_at_")              // 이메일 구분자 → _at_
+                .replaceAll("T", "_")                 // ISO-8601 T → _
+                .replaceAll("\\s+", "_");             // 공백 → "_"
+    }
+
+
+}
+

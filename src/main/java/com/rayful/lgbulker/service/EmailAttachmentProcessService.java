@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class EmailAttachmentProcessService {
@@ -38,6 +43,7 @@ public class EmailAttachmentProcessService {
 
   /**
    * 이메일 및 첨부파일 처리 로직
+   * 첨부id존재하고 unknown이 아닌 문자열로 시작하는 것만 처리
    */
   public List<Map<String, Object>>  processEmailAttachments(List<Map<String, Object>> emailDataList) {
 
@@ -69,8 +75,40 @@ public class EmailAttachmentProcessService {
   }
 
   /**
-   * 문서 내 이미지를 추출후 OCR 호출하여 제공받은 텍스트를 문서내용과 Merge 하여 본문저장
+   * 이메일 및 첨부파일 처리 로직
    */
+  public List<Map<String, Object>>  processEmailAttachments_elm(List<Map<String, Object>> emailDataList) {
+
+    List<Map<String, Object>> resultMapList = new ArrayList<>();
+
+    for (Map<String, Object> emailData : emailDataList) {
+      String emId = (String) emailData.get("em_id");
+      String attachId = (String) emailData.get("attach_id");
+      String attachName = (String) emailData.get("attach_name");
+      String attachPath = (String) emailData.get("attach_path");
+
+      //첨부id존재하고 unknown이 아닌 문자열로 시작하는 것만 처리
+      if (attachId != null && !attachId.startsWith("unknown")) {
+        if (isImageExtractableDocument(attachName)) { // 이미지를 추출해 작업할 파일
+          extractFile2TextWithOcr(emailData, attachPath, emId, attachId);
+//          System.out.println("본문추출1: " + emailData.get("attach_body"));
+        } else if (isImageFile(attachName)) { // 이미지 파일
+          extractImage2Text(emailData, attachPath, emId, attachId);
+//          System.out.println("본문추출2: " + emailData.get("attach_body"));
+        } else { // 그외 대상
+          extractOtherFile2Text(emailData, attachPath, emId, attachId);
+//          System.out.println("본문추출3: " + emailData.get("attach_body"));
+        }
+      }
+      resultMapList.add(emailData);
+    }
+
+    return resultMapList;
+  }
+
+  /****************************************************************************
+   * 문서 내 이미지를 추출후 OCR 호출하여 제공받은 텍스트를 문서내용과 Merge 하여 본문저장
+   **************************************************************************/
   private void extractFile2TextWithOcr(Map<String, Object> emailData, String filePath, String emId, String attachId) {
     System.out.println("call extractFile2TextWithOcr(): " + filePath);
 
@@ -83,6 +121,7 @@ public class EmailAttachmentProcessService {
 
       File contentFile = new File(outputDir, "content.txt");
 
+      // 사이냅필터 사용시 옵션 -ei를 주어 이미지까지 추출...
       ProcessBuilder processBuilder = new ProcessBuilder(EXE_PATH, "-ei", IMAGE_OUTPUT_PATH + "/" + emId + "_" + attachId , filePath);
       processBuilder.redirectErrorStream(true); // 에러 출력도 통합
       Process process = processBuilder.start();
@@ -99,7 +138,9 @@ public class EmailAttachmentProcessService {
       int exitCode = process.waitFor();
       System.out.println("추출 완료: " + filePath + " (exitCode: " + exitCode + ")");
 
+      //**********************************************
       // 본문에서 이미지 OCR 처리
+      //**********************************************
       String updatedBody = replaceImageIndexesWithOCR(readFileContent(contentFile), emId, attachId);
 
       // OCR 처리된 내용 다시 파일에 저장
@@ -189,7 +230,7 @@ public class EmailAttachmentProcessService {
     Matcher matcher = pattern.matcher(text);
     StringBuffer result = new StringBuffer();
     String baseDir = IMAGE_OUTPUT_PATH + "/" + emId + "_" + attachId;
-    String[] allowedExtensions = { "jpg", "jpeg", "png", "gif", "tiff", "bmp" };
+    String[] allowedExtensions = { "jpg", "jpeg", "png", "tiff", "bmp" };
     while (matcher.find()) {
       String imageIndex = matcher.group(1);
       String imagePrefix = "img" + imageIndex;
@@ -236,14 +277,19 @@ public class EmailAttachmentProcessService {
     return content.toString();
   }
 
-  /**
+  /*****************************************************
    * OCR API를 호출하여 이미지에서 추출한 텍스트를 반환한다.
-   */
+   *************************************************/
   private String callOCRApi(String imagePath) {
 //    System.out.println("OCR API 호출: " + imagePath);
 
     try {
       File file = new File(imagePath);
+
+      if (getFileExtension(file.getName()).equalsIgnoreCase("bmp")) {
+        log.info("{}, 파일 형식 변환 bmp --> jpg", file.getName());
+        file = convertBmpToJpg(file);
+      }
       byte[] fileContent = Files.readAllBytes(file.toPath());
       String base64Encoded = Base64.getEncoder().encodeToString(fileContent);
 
@@ -344,7 +390,7 @@ public class EmailAttachmentProcessService {
    * 이미지 파일인지 확인하는 메서드
    */
   private static boolean isImageFile(String fileName) {
-    return fileName.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif|tiff|bmp)$");
+    return fileName.toLowerCase().matches(".*\\.(jpg|jpeg|png|tiff|bmp)$");
   }
 
   /**
@@ -353,4 +399,14 @@ public class EmailAttachmentProcessService {
   private static boolean isWindows() {
     return System.getProperty("os.name").toLowerCase().contains("win");
   }
+
+  public static File convertBmpToJpg(File bmpFile) throws IOException {
+
+    BufferedImage image = ImageIO.read(bmpFile);
+    File jpgFile = new File(bmpFile.getParent(), bmpFile.getName().replaceAll("\\.bmp$", ".jpg"));
+    ImageIO.write(image, "jpg", jpgFile);
+    return jpgFile;
+  }
+
+
 }

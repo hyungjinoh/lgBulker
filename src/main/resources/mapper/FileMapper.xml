@@ -17,8 +17,8 @@
         SELECT
                concat('f', b.id)                                                            as File_GUID
              , concat('m', b.movie_id)                                                      as Mail_GUID
---             , concat('D:\\1.data_poc\\attachments\\', b.attachname)                        as File_ContentPath
-             , concat('/data/poc/bulker/attachments/', b.attachname)                        as File_ContentPath
+             , concat('D:\\1.data_poc\\attachments\\', b.attachname)                        as File_ContentPath
+--             , concat('/data/poc/bulker/attachments/', b.attachname)                        as File_ContentPath
              , b.attachname                                                                 as File_Name
              , ''                                                                          as link_yn
             , DATE_FORMAT(now(), '%Y-%m-%dT%H:%i:%s')                                       as File_Time

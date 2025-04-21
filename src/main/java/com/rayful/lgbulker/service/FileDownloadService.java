@@ -28,6 +28,7 @@ public class FileDownloadService {
   @Value("${app.paths.input.download}")
   private String DOWNLOAD_DIR;
 
+  //실제 파일을 다운로드 받아 처리 다운로드가 완료되면 처리수행함.
   public List<String> downloadFiles(String[] urls) throws IOException {
     List<String> attachList = new ArrayList<>();
 
@@ -55,7 +56,7 @@ public class FileDownloadService {
           // 다운로드할 파일이 이미지, 오피스, pdf, hwp, zip 인경우에만 다운로드 수행함.
           if (fileName.endsWith(".doc") || fileName.endsWith(".docx") || fileName.endsWith(".ppt")
                   || fileName.endsWith(".pptx") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx")
-                  || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")
+                  || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png") || fileName.endsWith(".bmp")
                   || fileName.endsWith(".tiff ") || fileName.endsWith(".hwp") || fileName.endsWith(".zip")
                   || fileName.endsWith(".pdf")) {
 

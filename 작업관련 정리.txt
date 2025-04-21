@@ -1,0 +1,84 @@
+
+1. 외부프로파일 사용하도록 설정 : 별도경로에 파일복사후 자바실행시 사용.
+   java -jar myapp.jar --spring.config.location=file:./config/application-prod.yml
+
+2. es에 저장된 컨텐츠의 날짜 형식 날짜형식변환 필요한지 확인 (자바코드에선 변환되도록 로직 추가하였음.)
+    "2025-03-28T15:25:19"
+
+3. 로컬pc 작업경로
+    D:\1.data_poc
+                \input
+                \output
+                \logs
+                \sampleJson\attach     -- elm에서 다운로드 받은 첨부파일등 (ppt)및 이미지 파일 저장됨
+                \synap_v4              -- 윈도우즈용 사이냅필터.
+
+4. 프로그램 실행방법
+    가. 비정상 json --> 정상 json으로 변환코드
+        경로 : /data/poc/bulker/bin/
+                email_maker.sh          ==> /data/poc/bulker/input/raw_email 경로안의 json파일 처리후, 원본파일_true.json 으로 저장
+                file_maker.sh           ==> /data/poc/bulker/input/raw_file 경로안의 json파일 처리후, 원본파일_true.json 으로 저장
+
+    나. 메일json 과 파일json  실제 가공 및 처리후 색인
+        경로 : /data/poc/bulker/bin/start.sh
+
+
+
+5. 실행시...Gateway time out
+===================================ocr api 호출 에러=== Gateway timeout
+2025-04-14 12:31:34 [restartedMain] INFO  com.rayful.lgbulker.util.FileUtils - 작업폴더 정리완료: D:\1.data_poc\output\merged
+2025-04-14 12:31:34 [restartedMain] INFO  com.rayful.lgbulker.util.FileUtils - 작업폴더 정리완료: D:\1.data_poc\output\bulkfiles
+call extractFile2TextWithOcr(): D:\1.data_poc\attachments\(강의자료)_스프링_부트를_이용한__웹서비스_개발.pdf
+추출 완료: D:\1.data_poc\attachments\(강의자료)_스프링_부트를_이용한__웹서비스_개발.pdf (exitCode: 0)
+OCR API 호출 실패 (HTTP 504)
+OCR API 호출 실패 (HTTP 504)
+OCR API 호출 실패 (HTTP 504)
+OCR API 호출 실패 (HTTP 504)
+OCR API 호출 실패 (HTTP 504)
+OCR API 호출 실패 (HTTP 504)
+
+
+
+
+6. 주요 처리로직 MailAttachService.java
+
+
+!!최대로 케이스를 나눠처리하라!!
+
+       *  // 결과타입M : 모든 메일 정보 포함(첨부파일 정보 없음.)
+       *  // 결과타입A : 파일-메일 매치된것만 포함
+       *  // 결과타입C  : 파일메일에서 압축파일만 포함, ResultA에서 파일확장자가 .zip 인 파일만 뽑아 별도저장
+       *  // 결과타입D : 파일메일에서 일반파일만 포함,  ResultA - ResultC
+       *  ----------------------결과타입B : 파일x 메일만 존재한것만 포함 -- 사용하지 않음.-------------------------------
+
+
+       *  // yesBodyLinkList : 결과타입M 의 메일본문에서 bodyLink 있는 것만 모아놓음
+       *  // noBodyLinkList : : 결과타입M 의 메일본문에서 bodyLink 없는 것만 모아놓음
+
+       *  // linkRemovedList : yesBodyLinkList 에서 bodyLink 있는 것만 모아놓음
+       *  // linkRemovedList_With_Zip : 본문링크 있고 첨부있는것
+       *  // linkRemovedList_With_Zip_unzipped : 바로 위에것에서 첨부 풀어놓은것
+
+
+      /***
+       * 최종결과 리스트 : 모든이메일
+       *              +링크없는목록 : noBodyLinkList
+       *              +링크있는목록 : yesBodyLinkList
+       *              +링크제거된목록(일반) : linkRemovedList
+       *              +링크제거된목록(첨부파일에서압축푼것) : linkRemovedList_With_Zip_unzipped
+       */
+      List<LGFileMailVO> finalResultList = new ArrayList<>();
+      finalResultList.addAll(resultListAll);
+      finalResultList.addAll(noBodyLinkList);
+      finalResultList.addAll(yesBodyLinkList);
+      finalResultList.addAll(linkRemovedList);
+      finalResultList.addAll(linkRemovedList_With_Zip_unzipped);
+
+
+
+
+
+
+
+
+

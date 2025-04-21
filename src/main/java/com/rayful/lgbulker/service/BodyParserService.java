@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,11 +19,33 @@ import java.util.stream.Collectors;
 @Service
 public class BodyParserService {
 
+//  public Set<String> extractUrls(String content, boolean isHtml) {
+//    if (isHtml) {
+//      return UrlExtractor.extractUrlsFromHtml(content);
+//    } else {
+//      return UrlExtractor.extractUrlsFromPlainText(content);
+//    }
+//  }
+
   public Set<String> extractUrls(String content, boolean isHtml) {
     if (isHtml) {
       return UrlExtractor.extractUrlsFromHtml(content);
     } else {
       return UrlExtractor.extractUrlsFromPlainText(content);
     }
+  }
+
+  public Set<String> extractUrls_normallink(String text, boolean onlyImages) {
+    Set<String> urls = new LinkedHashSet<>();
+    String urlRegex = "(https?://[^\\s\"'<>]+)";
+    Pattern pattern = Pattern.compile(urlRegex);
+    Matcher matcher = pattern.matcher(text);
+
+    while (matcher.find()) {
+      String url = matcher.group(1);
+      urls.add(url);
+    }
+
+    return urls;
   }
 }

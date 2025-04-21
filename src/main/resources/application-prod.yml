@@ -5,7 +5,7 @@ spring:
     application:
         name: lg
     datasource:
-        url: jdbc:mysql://122.199.202.100:13306/movies
+        url: jdbc:mysql://192.168.14.112:3306/movies
         username: root
         password: pass123#
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -33,6 +33,7 @@ app:
             emails: /data/poc/bulker/input/emails            # 이메일형식의 json 파일(파싱처리됨, by 소만사)
             files: /data/poc/bulker/input/files
             download: /data/poc/bulker/input/download
+            images: /data/poc/bulker/input/images
         output:
             bulkfiles: /data/poc/bulker/output/bulkfiles
             merged: /data/poc/bulker/output/merged
@@ -45,12 +46,15 @@ app:
         size: 100
 
 elasticsearch:
-        bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
-        idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
+#        bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
+#        idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
+        bulk_idx_url: http://192.168.14.112:9200/idx_email/_bulk
+        idx_refresh: http://192.168.14.112:9200/idx_email/_refresh
         auth: elastic:elastic
 ocr:
     edentns:
-        ocr_api_url: https://ocr.edentns.ai/document/general
+        #ocr_api_url: https://ocr.edentns.ai/document/general
+        ocr_api_url: http://192.168.14.111:8000/document/general
     output_path:
         image: /data/poc/bulker/output/synap/image
         text: /data/poc/bulker/output/synap/text

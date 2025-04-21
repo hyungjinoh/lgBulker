@@ -1,0 +1,137 @@
+가가.
+*********************************
+* 최종 배포판 jar 파일 서버에 업로드 필요
+    /data/poc/bulker/lib/lgBulker-0.0.1-SNAPSHOT.jar
+
+* 최종 배포판 설정파일 application-prod.yml 파일 배포 필요
+    elasticsearch.bulk_idx_url (및 refresh_url) : 신규값으로 세팅
+    ocr.edentns.ocr_api_url : 신규값으로 세팅
+
+
+
+*********************************
+가. live 서버 LG네트웍에 물린후 인터넷 연결되는지 여부 확인필요
+    ==> 미연결시,  네이버 대용량첨부된 파일 다운로드 못함.
+                  메일본문안의 url 링크 태그 / a href로 연결된 링크로 부터 파일다운로드 못함.
+                  ==> 이미지 및 첨부파일을 다운로드 하지 못해 OCR 처리 요청 하지 못함.
+
+                  ==> 파일json 안의 개별 아이템의 속성값 File_ContentPath 에 첨부파일 경로 있는지 확인필요.
+
+    참고) 제공받은 클라우드PC (작업pc)가 인터넷 연결되는지 여부 확인필요
+
+*********************************
+나. 모니터 준비 필요.
+
+*********************************
+다. elm 파일 파싱 필요한가???
+    만약을 대비해서 약간의 준비 필요.
+
+*********************************
+라. LG에 반입된 서버접속정보 확인필요
+    계정 (rayful/rayful1!)
+
+    . 반입전 실행중인 SW중지 필요
+        . elasticsearch 및 kibana shutdown . mysql 도커 container shutdown
+
+마. 컨텐츠 변환 필요한가?
+*********************************
+1. 소만사에서 제공한 json 파일들이 정상적인 json 파일인지 확인
+    * 멀티 item이 리스트로 정상 저장된것  ==> 별도의 가공처리 없이 작업수행가능
+    * 일반 스트링파일인지 여부  ===> 별도의 가공처리 작업 필요
+        패키지 com.rayful.lgbulker.transform
+            True_Json_EmailMaker_Test.java      정상 이메일 json 파일형식으로 변환
+            True_Json_File_MakerTest.java       정상 파일 json 파일형식으로 변환
+
+
+
+
+
+
+
+
+*** elm 파일 메일본문에 삽입된 이미지 확인결과
+메일제목 : 2025-04-07 14.38.00[185BF]사내메일에서 네이버 발송 Case0-본문이미지삽입(JPG, PNG, BMP).eml
+
+link추출결과        본문의 내용...
+cid:002,  ====> <img src="cid:000" title="" alt="그림1" border="0" style="width: 486px; height: 678px; border: 0px solid rgb(0, 0, 0);">
+cid:000, ====>  <img src="cid:001" title="" alt="그림2" border="0" style="width: 486px; height: 678px; border: 0px solid rgb(0, 0, 0);">
+cid:001, ====> <img src="cid:002" title="" alt="그림3" border="0" style="width: 486px; height: 678px; border: 0px solid rgb(0, 0, 0);">
+
+===> 실제파일명 : 그림1.jpg 그림2.png 그림3.bmp
+
+
+????????????????????????????????????????????????????????????????????????????????????????
+----------------이미지........---------
+파일.json 안의 파일의 속성중 아래 2개의 필드가 있는데 2개의 경로와 일치하는가?
+=====> File_ContentPath : /somansa/data/gfs_data/ina/20250404/default/llpu4k0/attach/620100/00000000/0766_image001.png
+=====> File_DownloadLink : https://bigattach.lg.co.kr:15000/storage/1C978EDC1584BF3249258C65001E4CF9/download.do
+
+
+참고)) 대용량파일링크걸린 파일에 대한 실제물리경로는 풀경로임...
+{
+  "File_AbnormalNested": [ ],
+  "File_GUID": "cc3ff443-b1d4-4a56-b08b-9b75d59ebd9c",
+  "File_Name": "TAKAYA RFdivision.pptx.gz",
+  "File_Size": "11",
+  "Mail_GUID": "cae0cfee-a55b-4a6a-a0e4-1a237785bf20",
+  "File_ContentPath": "/somansa/data/gfs_data/ina/20250404/default/llpu4k0/attach/620100/00000000/0767_TAKAYA RFdivision.pptx.gz",
+  "File_Time": "2025-04-04 08:27:58",
+  "File_DownloadLink": "https://165.243.64.200/DLPCenter/logDownloadFile.down?fileID=1d7b6fef9163f46e747b84f33aceb860bc91f54f4d8f76475bf9223d185f9340cc5531f00ce50a8a9680b49261d42705d9a0d9729cb5452386893f65760d5ddf8772a1b59b8764a54a5f05bf6c28490bbefa39e550c5d850e78a5e3d35a175da29f23943f8753c3061f92ec6519a6935"
+},
+
+
+*** 대용량파일 다운로드 링크 (더블링크)
+메일제목 : 네이버메일에서 LG 발송 Case0-본문이미지삽입(JPG, PNG, BMP)
+본문내용의 링크 : https://bigattach.lg.co.kr:15000/storage/1C978EDC1584BF3249258C65001E4CF9/download.do
+    이지만....위 URL에 접속하면
+    실제 파일다운로드 받을 수 있는 링크가 별도로 있고 이걸클릭해야 됨.
+        : https://bigattach.lg.co.kr:15000/storage/1C978EDC1584BF3249258C65001E4CF9/2910e90084b44651a097535c1e268abb/download.do
+
+
+
+
+        // ✅ 본문 추출
+        StringBuilder bodyText = new StringBuilder();
+        extractBodyOnly(message, bodyText);
+
+        // ✅ 본문에서 이미지 링크 추출
+
+
+
+
+불용어 ..검색어
+-----------------------------------------------------------------------------------
+사용권, 계약, 수락, 최성갑, 활성화, 영재, 초청, 미래
+-----------------------------------------------------------------------------------
+
+사내메일에서 네이버 발송 Case0-본문이미지삽입(JPG, PNG, BMP)
+JPG - 사용권
+PNG - 계약
+BMP - 수락
+
+사내메일에서 네이버 발송 Case1-일반첨부 ( 텍스트 : 최성갑 )
+사내메일에서 네이버 발송 Case2-일반첨부 ( 이미지 : 활성화 )
+사내메일에서 네이버 발송 Case3-일반첨부 ( 객체-이미지 : 영재 )
+사내메일에서 네이버 발송 Case4-일반첨부 ( 객체-엑셀-이미지 : 초청 )
+사내메일에서 네이버 발송 Case5-일반첨부 ( 객체-엑셀-아이콘 : 미래 )
+사내메일에서 네이버 발송 Case6-일반첨부 ( 객체-엑셀-이미지 : 미래 )
+
+사내메일에서 네이버 발송 Case1-대용량첨부 ( 텍스트 : 최성갑 )
+사내메일에서 네이버 발송 Case2-대용량첨부 ( 이미지 : 활성화 )
+사내메일에서 네이버 발송 Case3-대용량첨부 ( 객체-이미지 : 영재 )
+사내메일에서 네이버 발송 Case4-대용량첨부 ( 객체-엑셀-이미지 : 초청 )
+사내메일에서 네이버 발송 Case5-대용량첨부 ( 객체-엑셀-아이콘 : 미래 )
+사내메일에서 네이버 발송 Case6-대용량첨부 ( 객체-엑셀-이미지 : 미래 )
+
+네이버메일에서 LG 발송 Case0-본문이미지삽입(JPG, PNG, BMP)
+JPG - 사용권
+PNG - 계약
+BMP - 수락
+
+네이버메일에서 LG 발송 Case1-일반첨부 ( 텍스트 : 최성갑 )
+네이버메일에서 LG 발송 Case2-일반첨부 ( 이미지 : 활성화 )
+네이버메일에서 LG 발송 Case3-일반첨부 ( 객체-이미지 : 영재 )
+네이버메일에서 LG 발송 Case4-일반첨부 ( 객체-엑셀-이미지 : 초청 )
+네이버메일에서 LG 발송 Case5-일반첨부 ( 객체-엑셀-아이콘 : 미래 )
+네이버메일에서 LG 발송 Case6-일반첨부 ( 객체-엑셀-이미지 : 미래 )
+

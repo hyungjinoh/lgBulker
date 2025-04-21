@@ -95,8 +95,10 @@ public class EmailAttachmentProcessor {
 
     /**
      * 이메일 및 첨부파일 처리 로직
+     *
+     * @return
      */
-    public static void processEmailAttachments(List<Map<String, Object>> emailDataList) {
+    public static List<Map<String, Object>> processEmailAttachments(List<Map<String, Object>> emailDataList) {
         
     	for (Map<String, Object> emailData : emailDataList) {
             String emId = (String) emailData.get("em_id");
@@ -120,6 +122,7 @@ public class EmailAttachmentProcessor {
                 }
             } 
         }
+        return emailDataList;
     }
     
     /**

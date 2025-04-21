@@ -48,6 +48,14 @@ dependencies {
 	implementation 'com.sun.mail:javax.mail:1.6.2'  //MIME Check
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// ✅ LGEmail 양식테스트
+	testImplementation 'com.sun.mail:javax.mail:1.6.2'
+	testImplementation 'org.assertj:assertj-core:3.24.2'
+
+	implementation("com.sun.mail:jakarta.mail:1.6.7") // Java 11 호환, MimeUtility 포함
+
+
 }
 
 

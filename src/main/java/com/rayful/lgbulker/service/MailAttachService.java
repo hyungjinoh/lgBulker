@@ -2,17 +2,19 @@ package com.rayful.lgbulker.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rayful.lgbulker.util.ContentTypeDetector;
-import com.rayful.lgbulker.util.ExternalConverter;
-import com.rayful.lgbulker.util.FileUtils;
+import com.rayful.lgbulker.util.*;
 import com.rayful.lgbulker.vo.*;
-import com.rayful.lgbulker.util.BulkFileWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
+import javax.mail.Multipart;
+import javax.mail.Part;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +22,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.logging.log4j.core.util.FileUtils.getFileExtension;
 
@@ -31,29 +36,32 @@ public class MailAttachService {
 
   // --- 설정 값 주입 ---
   @Value("${app.paths.input.emails}")
-  private String EMAILS_JSON_DIR;          //가. 처리대상 json 형식 이메일 파일들 경로
+  private String EMAILS_JSON_DIR;          //가. json 형식, 이메일 파일들 경로
   @Value("${app.paths.input.files}")
-  private String FILES_JSON_DIR;     //나. 처리대상 : 가. 를 첨부기준 json 형식으로 저장한 결과
+  private String FILES_JSON_DIR;           //나. json 형식, 이메일에 첨부된 처리대상 파일 경로
+  @Value("${app.paths.input.images}")
+  private String IMAGEFILE_DIR;            // 다. 처리대상 : 이미지 파일 저장공간
 
   @Value("${app.paths.output.merged}")
-  private String MERGED_DIR;     //다. 첨부+이메일 통합 파일 저장경로
+  private String MERGED_DIR;                //라. 파일+이메일 통합 파일 저장경로
   @Value("${app.paths.output.bulkfiles}")
-  private String BULK_PATH;       //다. ES에 색인위한 bulk파일 저장경로
+  private String BULK_PATH;                 //마. ES에 색인위한 bulk파일 저장경로
   @Value("${app.paths.attachments}")
-  private String ATTACHMENTS_PATH;     //라. 첨부파일저장경로1
+  private String ATTACHMENTS_PATH;          //라. 첨부파일저장경로1
   @Value("${elasticsearch.bulk_idx_url}")
-  private String INDEXING_URL;    //마. 검색인덱스URL
+  private String INDEXING_URL;              //마. 검색인덱스URL
   @Value("${elasticsearch.idx_refresh}")
-  private String REFRESH_URL;      //바. 색인요청후 refresh
+  private String REFRESH_URL;               //바. 색인요청후 refresh
   @Value("${elasticsearch.auth}")
-  private String ES_AUTH;                 //사. ES 접속 계정(id/pw 인증 필요시 사용)
+  private String ES_AUTH;                    //사. ES 접속 계정(id/pw 인증 필요시 사용 )
 
   private final FileService fileService;  //첨부파일 압축해제 unzip
   private final ExternalConverter externalConverter;    //외부필터 사용.
   private final BulkFileWriter bulkFileWriter;
   private final BodyParserService bodyParserService;
   private final FileDownloadService fileDownloadService;
-  //ocr
+  private final LargeSizeFileDownloadService largeSizeFileDownloadService;
+  //ocr - 서차장 모듈
   private final EmailAttachmentProcessService emailAttachmentProcessService;
 
   //로그 수집위해 사용.
@@ -64,41 +72,44 @@ public class MailAttachService {
 
   List<String> totalAttachIds = new ArrayList<>(); //총 처리대상 첨부파일 id
 
-  private RestTemplate restTemplate;
   private final ObjectMapper objectMapper = new ObjectMapper();
-//  private final String mailJsonPath = "src/main/resources/data/20250404_08_25_mail_0.json";
-//  private final String attachDirPath = "src/main/resources/data/attach";
 
+  /***
+   * 서비스 클래스의 메인로직
+   */
   public void load() {
     try {
 
-      ///데이터 로드시작
+      // 데이터 로드시작
       List<LGEmailVo> emails = loadEmails();  //이메일 json 파일 읽음
       List<LGFileVO> files = loadFiles();     //첨부 json 파일 읽음
 
       Map<String, LGEmailVo> mailMap = mapEmailsByGuid(emails); // 고유한 MailGUID만 뽑아 별도보관 (모든 이메일정보 포함)
 
       /***
+       *  // 결과타입M : 모든 메일 정보 포함(첨부파일 정보 없앰)
        *  // 결과타입A : 파일-메일 매치된것만 포함
-       *  // 결과타입B : 파일x 메일만 존재한것만 포함
-       *  // 결과타입C  : 결과타입A에서 파일확장자가 .zip 인 파일만 뽑아 별도저장
-       *  // 결과타입D :  ResultA - ResultC : 파일메일에서 첨부제외, 첨부파일은 별도 처리
+       *  // 결과타입C  : 파일메일에서 압축파일만 포함, ResultA에서 파일확장자가 .zip 인 파일만 뽑아 별도저장
+       *  // 결과타입D : 파일메일에서 일반파일만 포함,  ResultA - ResultC
+       *  ----------------------결과타입B : 파일x 메일만 존재한것만 포함 -- 사용하지 않음.-------------------------------
        */
+      List<LGFileMailVO> resultListM = processAllEmailsInfo(emails);
       List<LGFileMailVO> resultListA = processAttachments(mailMap);
-      List<LGFileMailVO> resultListB = processEmailsWithoutAttachments(resultListA, emails);
+//      List<LGFileMailVO> resultListB = processEmailsWithoutAttachments(resultListA, emails);
       List<LGFileMailVO> resultListC = getList_With_Zipfile(resultListA);
+
       List<LGFileMailVO> resultListD = resultListA.stream()
                                                    .filter(vo -> resultListC.stream().noneMatch(c -> c.getKey().equals(vo.getKey())))
                                                    .collect(Collectors.toList());
 
-      //첨부파일만 있는것 압축풀고, 일반 파일들로 구성된것들  일반파일 목록에 추가
+      //첨부파일만 있는것 압축풀어, 일반 파일들로 구성후  일반파일 목록에 추가
       List<LGFileMailVO> unzippedList = fileService.checkFile_Unzip_if_Zipfile(resultListC);
 
       //---------------------중간결과파일, 링크처리전---------------------------
       List<LGFileMailVO> resultListAll = new ArrayList<>();
-      resultListAll.addAll(resultListB);  //이메일만
-      resultListAll.addAll(resultListD);   //일반파일만
-      resultListAll.addAll(unzippedList);    //첨부파일만 있는것 압축풀고, 푼것들 일반파일 목록에 추가
+      resultListAll.addAll(resultListM);  // 모든 이메일.
+      resultListAll.addAll(resultListD);   // 일반파일만 있는것
+      resultListAll.addAll(unzippedList);    //첨부파일만 있는것 압축풀고, 별도의 일반파일 목록에 추가
 
       /***
        * 링크 처리부분 시작
@@ -107,34 +118,44 @@ public class MailAttachService {
        * linkRemovedList 에서 첨부파일 있는놈들만 별도로 추출 : linkRemovedList_With_Zip
        * 첨부파일만 있는것 압축풀고, 푼것들 일반파일 목록에 추가 : resultListD_Link_With_Zip_unzipped
        */
-      List<LGFileMailVO> yesBodyLinkList = new ArrayList<>();   //링크 있는것
-      List<LGFileMailVO> noBodyLinkList = new ArrayList<>();    //링크 없는것
-      processBodyLinks(resultListAll, yesBodyLinkList, noBodyLinkList);
+      List<LGFileMailVO> yesBodyLinkList = new ArrayList<>();   //링크 있는 메일저장
+      List<LGFileMailVO> noBodyLinkList = new ArrayList<>();    //링크 없는 메일저장
+
+      //파일Json에서 대용량 첨부링크가 있는것만 저장, live 서버가 운영서버인경우 인터넷연결안되면 불필요. 임시코딩함.
+      List<LGFileMailVO> largeFileDownloadLinkList = new ArrayList<>();
+
+      //메일본문에서 링크 있는것/없는것 별도로 분리처리
+      processBodyLinks(resultListM, yesBodyLinkList, noBodyLinkList);
+
       List<LGFileMailVO> linkRemovedList = splitByBodyLinks(yesBodyLinkList);;
       List<LGFileMailVO> linkRemovedList_With_Zip = getList_With_Zipfile(linkRemovedList);
       List<LGFileMailVO> linkRemovedList_With_Zip_unzipped = fileService.checkFile_Unzip_if_Zipfile(linkRemovedList_With_Zip);
 
       /***
-       * 최종결과 리스트 : 링크없는목록+링크있는목록+링크제거된목록(일반)+링크제거된목록(첨부파일에서압축푼것)
+       * 최종결과 리스트 : 모든이메일
+       *              +링크없는목록 : noBodyLinkList
+       *              +링크있는목록 : yesBodyLinkList
+       *              +링크제거된목록(일반) : linkRemovedList
+       *              +링크제거된목록(첨부파일에서압축푼것) : linkRemovedList_With_Zip_unzipped
        */
       List<LGFileMailVO> finalResultList = new ArrayList<>();
+      finalResultList.addAll(resultListAll);
       finalResultList.addAll(noBodyLinkList);
       finalResultList.addAll(yesBodyLinkList);
       finalResultList.addAll(linkRemovedList);
       finalResultList.addAll(linkRemovedList_With_Zip_unzipped);
 
-      /***
-       * 리스트를 맵으로 변환, 서차장이 파일 첨부파일처리, OCR 처리 하는 부분
-       */
+      /*************************************************
+       * 리스트를 맵으로 변환, 서차장이 파일에 대한 텍스트 추출 및 OCR 처리 하는 부분사용하기 위한 변환
+       ************************************************/
       List<Map<String, Object>> convertedMapList = convertToMapList(finalResultList);
-
 
       //사이냅 필터처리, 이미지 처리 등등.... 부분  -- 오형진
 //      enrichAttachBodies(convertedMapList);
+//      bulkFileWriter.writeAsBulkJsonFiles(convertedMapList, MERGED_DIR);
 
-      List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedMapList);
-
-
+//  서차장...이든TNS OCR API 호출 및 첨부파일ㅇ서 텍스트 추출....
+    List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedMapList);
       //벌크파일 생성호출
       bulkFileWriter.writeAsBulkJsonFiles(finalMapList, MERGED_DIR);
 
@@ -143,26 +164,31 @@ public class MailAttachService {
     }
   }
 
-  private static List<LGFileMailVO> getList_With_Zipfile(List<LGFileMailVO> resultListA) {
-    List<LGFileMailVO> resultListC = new ArrayList<>();
-    for(LGFileMailVO itemVo : resultListA) {
+
+  /***
+   * 입력리스트를 받아, 파일명의 확장자가 zip인것만 뽑아냄.
+   * @param inputList
+   * @return
+   */
+  private static List<LGFileMailVO> getList_With_Zipfile(List<LGFileMailVO> inputList) {
+    List<LGFileMailVO> resultList = new ArrayList<>();
+    for(LGFileMailVO itemVo : inputList) {
         String attachFile = itemVo.getAttach_path();
 
         if(!attachFile.isEmpty()) {
           File file = new File(attachFile);
           String ext = getFileExtension(file);
 
-          //  첨부파일이 .zip 확장자일 경우 재귀적으로 압축을 해제하고, 내부에 있는 개별 파일을 LGFileMailVO로 변환해서 리턴
           if(ext.equalsIgnoreCase("zip")) {
-            resultListC.add(itemVo);
+            resultList.add(itemVo);
           }
         }
     }
-    return resultListC;
+    return resultList;
   }
 
   /***
-   * 사이냅필터(외부 프로그램에서 호출)하여 파일에서 첨부파일 처리
+   * 사이냅필터(외부 프로그램에서 호출)하여 파일에서 첨부파일 처리 by Oh
    * @param resultMapList
    */
   private void enrichAttachBodies(List<Map<String, Object>> resultMapList) {
@@ -206,6 +232,11 @@ public class MailAttachService {
   }
 
 
+  /***
+   * 입력 리스트에서 본문내용을 뽑아내 bodyLinks 속성안의 개별 갯수만큼 반복처리후 , 별도의 List<LGFileMailVO> 생성하여 리턴
+   * @param yesBodyLinkList
+   * @return
+   */
   public List<LGFileMailVO> splitByBodyLinks(List<LGFileMailVO> yesBodyLinkList) {
     List<LGFileMailVO> total = new ArrayList<>();
 
@@ -216,11 +247,18 @@ public class MailAttachService {
         continue;
       }
 
+      //본문에서 링크 있는것, 링크 갯수만큼 별도 처리
       for (int i = 0; i < bodyLinks.size(); i++) {
         String link = bodyLinks.get(i);
 
-        String newKey = originalVo.getKey() + "_link_" + (i + 1);
-        String newAttachId = originalVo.getAttach_id() + "_link_" + (i + 1);
+        //OCR 요청처리는 attach_id가 unknown_ 이 아닌것 처리하기 때문에 별도의 키생성함. key 및 attach_id 동일
+        String newKey = originalVo.getKey();
+        if(newKey.contains("unknown_")) {
+          newKey = newKey.replace("unknown_", "urllink_");
+        }
+
+        newKey = newKey + "_link_" + (i + 1);
+        String newAttachId = newKey + "_link_" + (i + 1);
 
         File file = new File(link);
         String fileName = file.getName();
@@ -235,8 +273,7 @@ public class MailAttachService {
                                          .link_yn("Y")
                                          .attach_body("")               // ✔ 비움
                                          .attachFile(null)             // ✔ 제외
-                                         // 이하 메일 메타데이터 복사
-                                         .em_id(originalVo.getEm_id())
+                                         .em_id(originalVo.getEm_id())          // 이하 메일 메타데이터 복사
                                          .subject(originalVo.getSubject())
                                          .sender(originalVo.getSender())
                                          .senddtm(originalVo.getSenddtm())
@@ -262,37 +299,148 @@ public class MailAttachService {
    * @throws IOException
    */
   private void processBodyLinks(
-          List<LGFileMailVO> inputList,
-          List<LGFileMailVO> yesBodyLinkList,
-          List<LGFileMailVO> noBodyLinkList
-  ) throws IOException {
+              List<LGFileMailVO> inputList, List<LGFileMailVO> yesBodyLinkList, List<LGFileMailVO> noBodyLinkList ) throws Exception {
 
     for (LGFileMailVO vo : inputList) {
+
       String emBody = vo.getEm_body();
-      if (emBody == null || emBody.isBlank()) {
+      if (emBody == null || emBody.isBlank()) { //본문내용없는 경우 pass
         noBodyLinkList.add(vo);
         continue;
       }
 
       boolean isHtml = ContentTypeDetector.isHtml(emBody);
-      Set<String> urls = bodyParserService.extractUrls(emBody, isHtml);
 
-      if (urls.isEmpty()) {
+//      Set<String> urlLinks = bodyParserService.extractUrls(emBody, isHtml);
+//      emBody가 html인지 일반 텍스트인지에 따라 이미지 링크, url 링크 추출한다.
+      //이미지 링크만 추출. 확장자까지 명확하게 일치해야 추출된다.
+//      List<String> imageLinks = (List<String>) ImageUrlExtractor.extractImageUrls(emBody, true);
+//      imageLinks.forEach(System.out::println); // 이미지 링크만 출력
+
+      //링크 처리 *****************************************************************
+
+      // HTML 파싱
+      Document doc = Jsoup.parse(emBody);
+      Elements linkElements = doc.select("a[href]");
+
+//      이미지 링크만 별도 저장
+      List<String> imageLinks = new ArrayList<>();
+
+      // <img> 태그 선택
+      Elements images = doc.select("img");
+      //이미지 src 및 alt 속성값 저장한 맵리스트
+      List<Map<String, String>> imgurls = new ArrayList<>();
+
+      for (Element img : images) {
+        String src = img.attr("src");
+        String alt = img.attr("alt");
+
+        Map<String, String> map = new HashMap<>();
+        map.put("src", src);
+        map.put("alt", alt);
+
+        imgurls.add(map);
+
+        // 파일명 결정 로직  ---------------------------혹시나 해서 만들었음. 본문링크는 인터넷 안되면 다운로드 불가능함.
+        String filename;
+        if ("그림1".equals(alt)) {
+          filename = "그림1.jpg";
+        } else if ("그림2".equals(alt)) {
+          filename = "그림2.png";
+        } else if ("그림3".equals(alt)) {
+          filename = "그림3.bmp";
+        } else {
+          filename = "default.png";
+        }
+
+        //이미지 파일경로 풀경로로 추가
+        String image_path = IMAGEFILE_DIR+File.separator+filename;
+        imageLinks.add(image_path);
+      }
+
+      // 이미지링크..... 결과 출력
+//      System.out.println("\n✅ 이미지 파일 링크:");
+      imgurls.forEach(System.out::println);
+
+      // 링크 추출 및 분리(일반 링크 추출)
+      List<String> allLinks = linkElements.stream()
+              .map(el -> el.attr("href").trim())
+              .filter(link -> !link.isEmpty())
+              .collect(Collectors.toList());
+
+      //일반링크 추출
+      List<String> largeMailLinks = allLinks.stream()
+              .filter(link -> !isImageLink(link))
+              .collect(Collectors.toList());
+
+//      System.out.println("\n✅ 대용량 다운로드 링크:");
+      largeMailLinks.forEach(System.out::println);
+
+
+
+      //대용량파일 다운로드/////////////////////
+      List<String> largesizeFilenames = new ArrayList<>();
+      for(String urlLink : largeMailLinks) {
+        //크롬부라우저 Agent처럼 동작하며 실제 파일다운로드
+        String fname = largeSizeFileDownloadService.downloadFileFromTwoStepUrl_autoSession(largeMailLinks.get(0));
+
+        if(!fname.isEmpty()) {
+          largesizeFilenames.add(fname);
+        }
+
+      }
+
+      // 이미지 + 대용량 첨부 : 두개의 리스트 머지
+      List<String> downloadedFiles = Stream.concat(imageLinks.stream(), largesizeFilenames.stream())
+              .collect(Collectors.toList());
+
+      //이미지, URL링크 둘다 없으면 링크없음목록에 저장.
+      if (largeMailLinks.isEmpty() && imageLinks.isEmpty()) {
         noBodyLinkList.add(vo);
         continue;
       }
 
-      String[] urlArray = urls.toArray(new String[0]);
-      List<String> downloadedFiles = fileDownloadService.downloadFiles(urlArray);
-
+      //대용량첨부파일
       if (downloadedFiles.isEmpty()) {
         noBodyLinkList.add(vo);
-      } else {
-//        vo.setBodyLinks(downloadedFiles);
+
+      } else {  // 본문내 링크에서 추출했다라고, 아래 속성세팅
+        vo.setBodyLinks(downloadedFiles);
         vo.setLink_yn("Y");
         yesBodyLinkList.add(vo);
       }
     }
+  }
+
+  private boolean isImageLink(String url) {
+    return url.matches("(?i).+\\.(jpg|jpeg|png|gif|bmp|svg|webp|ico)(\\?.*)?$");
+  }
+
+  /***
+   * 모든 이메일들을 찾아서 LGFileMailVO 형태로 변환하여 리스트에 저장
+   * @param
+   * @param emailVos
+   * @return
+   */
+  private List<LGFileMailVO> processAllEmailsInfo(List<LGEmailVo> emailVos) {
+    List<LGFileMailVO> result = new ArrayList<>();
+
+    for (LGEmailVo lgEmailVo : emailVos) {
+
+      // 첨부파일 없는 메일도 처리
+      String key = "unknown_" + lgEmailVo.getMailGUID();
+
+      LGFileMailVO vo = LGFileMailVO.builder()
+              .key(key)
+              .attachFile(null)
+              .email(lgEmailVo)
+              .build();
+
+      vo.fillDerivedFields(); // 파생 필드 채움
+      result.add(vo);
+    }
+
+    return result;
   }
 
   /***
@@ -559,6 +707,33 @@ public class MailAttachService {
       return bodylink != null && !bodylink.toString().isBlank();
     }).collect(Collectors.toList());
   }
+
+
+  /** 본문 재귀 파싱 */
+  private void extractBody(Part part, StringBuilder bodyText, Set<String> imageLinks) throws Exception {
+    if (part.isMimeType("text/html") || part.isMimeType("text/plain")) {
+      Object content = part.getContent();
+      if (content instanceof String) {
+        bodyText.append((String) content);
+        extractImageCids((String) content, imageLinks);
+      }
+    } else if (part.isMimeType("multipart/*")) {
+      Multipart multipart = (Multipart) part.getContent();
+      for (int i = 0; i < multipart.getCount(); i++) {
+        extractBody(multipart.getBodyPart(i), bodyText, imageLinks);
+      }
+    }
+  }
+
+  /** HTML에서 CID 이미지 링크 추출 */
+  private void extractImageCids(String html, Set<String> cids) {
+    Pattern pattern = Pattern.compile("cid:([^\"'>\\s]+)");
+    Matcher matcher = pattern.matcher(html);
+    while (matcher.find()) {
+      cids.add("cid:" + matcher.group(1));
+    }
+  }
+
 
 
 

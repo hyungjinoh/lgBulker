@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -33,6 +34,7 @@ public class LGFileMailVO {
   private String idxdtm;
   private String em_body;
   private List<String> bodyLinks;
+  private List<Map<String,String>> imageLinks;
 //  private String from_bodylink;
 
   private LGFileVO attachFile;

@@ -19,8 +19,8 @@ public class BulkFileWriter {
   private static final ObjectMapper objectMapper = new ObjectMapper()
           .enable(SerializationFeature.INDENT_OUTPUT);
 
-  @Value("${app.bulk.size}")
-  private int MAX_ITEMS_PER_FILE;
+//  @Value("${app.bulk.size}")
+  private final int MAX_ITEMS_PER_FILE=1000;
 
   public void writeAsBulkJsonFiles(List<Map<String, Object>> dataList, String outputDirPath) {
     try {

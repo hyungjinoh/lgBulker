@@ -34,6 +34,7 @@ app:
             emails: D:\1.data_poc\input\emails                      # 이메일형식의 json 파일(파싱처리됨, by 소만사)
             files: D:\1.data_poc\input\files
             download: D:\1.data_poc\input\download
+            images: D:\1.data_poc\input\images
         output:
             bulkfiles: D:\1.data_poc\output\bulkfiles
             merged: D:\1.data_poc\output\merged
