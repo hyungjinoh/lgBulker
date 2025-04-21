@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@Builder
+@Builder(toBuilder = true)  // 🔁 toBuilder=true 추가
 @NoArgsConstructor
 @AllArgsConstructor
 public class LGFileMailVO {

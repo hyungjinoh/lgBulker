@@ -88,28 +88,27 @@ public class MailAttachService {
 
       /***
        *  // 결과타입M : 모든 메일 정보 포함(첨부파일 정보 없앰)
-       *  // 결과타입A : 파일-메일 매치된것만 포함
-       *  // 결과타입C  : 파일메일에서 압축파일만 포함, ResultA에서 파일확장자가 .zip 인 파일만 뽑아 별도저장
-       *  // 결과타입D : 파일메일에서 일반파일만 포함,  ResultA - ResultC
-       *  ----------------------결과타입B : 파일x 메일만 존재한것만 포함 -- 사용하지 않음.-------------------------------
+       *  // 결과타입F : 파일-메일 매치된것만 포함
+       *  // 결과타입Zipfile  : 파일메일에서 압축파일만 포함, ResultA에서 파일확장자가 .zip 인 파일만 뽑아 별도저장
+       *  // 결과타입NormalFile : 파일메일에서 일반파일만 포함,  ResultA - ResultC
        */
       List<LGFileMailVO> resultListM = processAllEmailsInfo(emails);
-      List<LGFileMailVO> resultListA = processAttachments(mailMap);
-//      List<LGFileMailVO> resultListB = processEmailsWithoutAttachments(resultListA, emails);
-      List<LGFileMailVO> resultListC = getList_With_Zipfile(resultListA);
+      List<LGFileMailVO> resultListF = processAttachments(mailMap);
+//      List<LGFileMailVO> resultListB = processEmailsWithoutAttachments(resultListF, emails);
+      List<LGFileMailVO> resultListZipfile = getList_With_Zipfile(resultListF);
 
-      List<LGFileMailVO> resultListD = resultListA.stream()
-                                                   .filter(vo -> resultListC.stream().noneMatch(c -> c.getKey().equals(vo.getKey())))
+      List<LGFileMailVO> resultListNormalFile = resultListF.stream()
+                                                   .filter(vo -> resultListZipfile.stream().noneMatch(c -> c.getKey().equals(vo.getKey())))
                                                    .collect(Collectors.toList());
 
       //첨부파일만 있는것 압축풀어, 일반 파일들로 구성후  일반파일 목록에 추가
-      List<LGFileMailVO> unzippedList = fileService.checkFile_Unzip_if_Zipfile(resultListC);
+      List<LGFileMailVO> unzippedFromZipfile = fileService.checkFile_Unzip_if_Zipfile(resultListZipfile);
 
       //---------------------중간결과파일, 링크처리전---------------------------
       List<LGFileMailVO> resultListAll = new ArrayList<>();
       resultListAll.addAll(resultListM);  // 모든 이메일.
-      resultListAll.addAll(resultListD);   // 일반파일만 있는것
-      resultListAll.addAll(unzippedList);    //첨부파일만 있는것 압축풀고, 별도의 일반파일 목록에 추가
+      resultListAll.addAll(resultListNormalFile);   // 일반파일만 있는것
+      resultListAll.addAll(unzippedFromZipfile);    //첨부파일만 있는것 압축풀고, 별도의 일반파일 목록에 추가
 
       /***
        * 링크 처리부분 시작
@@ -310,12 +309,6 @@ public class MailAttachService {
       }
 
       boolean isHtml = ContentTypeDetector.isHtml(emBody);
-
-//      Set<String> urlLinks = bodyParserService.extractUrls(emBody, isHtml);
-//      emBody가 html인지 일반 텍스트인지에 따라 이미지 링크, url 링크 추출한다.
-      //이미지 링크만 추출. 확장자까지 명확하게 일치해야 추출된다.
-//      List<String> imageLinks = (List<String>) ImageUrlExtractor.extractImageUrls(emBody, true);
-//      imageLinks.forEach(System.out::println); // 이미지 링크만 출력
 
       //링크 처리 *****************************************************************
 
