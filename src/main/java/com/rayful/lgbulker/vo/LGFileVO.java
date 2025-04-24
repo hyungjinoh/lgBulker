@@ -17,9 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 public class LGFileVO {
 
-  @Builder.Default
-  @JsonProperty("File_AbnormalNested")
-  private List<String> fileAbnormalNested = new ArrayList<>();
+  //@Builder.Default
+  //@JsonProperty("File_AbnormalNested")
+  //private List<String> fileAbnormalNested = new ArrayList<>();
 
   @JsonProperty("File_GUID")
   private String fileGUID;
