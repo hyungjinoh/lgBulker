@@ -48,6 +48,43 @@
 
 
 
+2025-04-24 07:28:18 [main] INFO  c.r.l.service.MailAttachService - -----------------------
+2025-04-24 07:28:18 [main] INFO  c.r.l.service.MailAttachService - resultListZipfile : []
+2025-04-24 07:28:18 [main] INFO  c.r.l.service.MailAttachService - -----------------------
+{src=https://kr.object.ncloudstorage.com/reuters/curation/mail_logo.png, alt=}
+{src=http://www.imooc.co.kr/rest/admin_curation/curation_user_recieve?idx=1602&idx_member=11266588, alt=}
+http://www.imooc.co.kr/rest/curation_script/1602
+http://www.imooc.co.kr/rest/curation_mail/1602/11266588
+http://www.imooc.co.kr/rest/curation_mail/1602/11266588/reply
+http://www.carrotenglish.com/
+http://www.imooc.co.kr/rest/admin_curation/curation_user_reject?idx_member=11266588&idx=1602&email=mjkim23@lg.com
+http://www.imooc.co.kr/rest/admin_curation/curation_user_reject?idx_member=11266588&idx=1602&email=mjkim23@lg.com
+2025-04-24 07:28:18 [main] ERROR c.r.l.service.MailAttachService - 로딩 실패
+java.lang.RuntimeException: JSESSIONID 쿠키가 없습니다.
+        at com.rayful.lgbulker.service.LargeSizeFileDownloadService.lambda$downloadFileFromTwoStepUrl_autoSession$2(LargeSizeFileDownloadService.java:53)
+        at java.base/java.util.Optional.orElseThrow(Optional.java:408)
+        at com.rayful.lgbulker.service.LargeSizeFileDownloadService.downloadFileFromTwoStepUrl_autoSession(LargeSizeFileDownloadService.java:53)
+        at com.rayful.lgbulker.service.MailAttachService.processBodyLinks(MailAttachService.java:423)
+        at com.rayful.lgbulker.service.MailAttachService.load(MailAttachService.java:133)
+        at com.rayful.lgbulker.LgBulkerApplication.run(LgBulkerApplication.java:104)
+        at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:759)
+        at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:749)
+        at org.springframework.boot.SpringApplication.run(SpringApplication.java:314)
+        at com.rayful.lgbulker.LgBulkerApplication.main(LgBulkerApplication.java:83)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+        at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+        at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+        at org.springframework.boot.loader.Launcher.launch(Launcher.java:108)
+        at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+        at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+2025-04-24 07:28:18 [main] INFO  c.r.lgbulker.LgBulkerApplication - ====================데이터 로드 완료===============
+2025-04-24 07:28:20 [main] INFO  c.r.lgbulker.LgBulkerApplication - ====================bulk file 생성 시작================
+2025-04-24 07:28:20 [main] WARN  c.r.l.service.MailAttachService - 처리할 JSON 파일이 없습니다.
+2025-04-24 07:28:20 [main] INFO  c.r.lgbulker.LgBulkerApplication - ======
+
+
 
 
 

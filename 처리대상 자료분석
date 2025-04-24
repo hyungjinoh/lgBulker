@@ -1,0 +1,49 @@
+
+
+
+<<mail-i 서버 연결정보>>
+165.243.64.200:22
+id/pw : ocradm / Sms980502!
+
+<<원본파일복사>>
+rayful@rayful:/data/poc/bulker/input/raw_files/20250424_org$ scp ocradm@165.243.64.200:/somansa/data/gfs_data/logdownload_ocr/maili/*.json .
+
+/somansa/data/gfs_data/logdownload_ocr/maili
+
+
+<<소만사에서 메일과 파일에 대한 데이터 생성은 5분마다 생성하지만 ,
+ 로그저장 경로엔 현재시간 기준 30분전 데이터만 키과거데이터는 삭제되는 것으로 보임...>>
+=========================================================================================
+
+<<파일json>> 현재시간 0422 14:20 pm 기준 , 원본경로엔 6개 파일json 존재
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_00_file_0.json | wc
+     34     106   21706
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_05_file_0.json | wc
+     38      91   23745
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_10_file_0.json | wc
+     24      97   17166
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_15_file_0.json | wc
+     58     177   38358
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_20_file_0.json | wc
+     43     286   30797
+[ocradm@LGCPSOBIGI01 maili]$ grep File_GUID 20250424_14_25_file_0.json | wc
+     36     105   22518
+
+===> 파일 total : 233
+
+<<메일json>>
+=========================================================================================
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_00_mail_0.json | wc
+     58   29259  367061
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_05_mail_0.json | wc
+     51   26044  453102
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_10_mail_0.json | wc
+     68   12569  267397
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_15_mail_0.json | wc
+     40   31686  367637
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_20_mail_0.json | wc
+     49   16851  263080
+[ocradm@LGCPSOBIGI01 maili]$ grep Mail_GUID 20250424_14_25_mail_0.json | wc
+     42   49172  587361
+
+===> 메일 total : 308
