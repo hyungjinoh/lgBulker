@@ -2,6 +2,7 @@ package com.rayful.lgbulker;
 
 import com.rayful.lgbulker.runner.TrueEmailJsonMakerRunner;
 import com.rayful.lgbulker.runner.TrueFileJsonMakerRunner;
+import com.rayful.lgbulker.runner.TrueFileJsonMakerRunnerWithPng;
 import com.rayful.lgbulker.service.MailAttachService;
 import com.rayful.lgbulker.service.IndexService;
 import com.rayful.lgbulker.util.Utils;
@@ -58,8 +59,11 @@ public class LgBulkerApplication implements ApplicationRunner {
     boolean isFileMakerMode = Arrays.stream(args)
             .anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemaker"));
 
+    boolean isFileMakerMdePng = Arrays.stream(args)
+            .anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemakerpng"));
+
     // 이메일|파일의 원본소스파일이 비정상json -> 정상 json 형식으로 가공하는 코드 실행, LgBulkerApplication_emailMaker, LgBulkerApplication_fileMaker
-    if (isEmailMakerMode || isFileMakerMode) {
+    if (isEmailMakerMode || isFileMakerMode || isFileMakerMdePng) {
       var ctx = app.run(args);
 
       if (isEmailMakerMode) {
@@ -69,6 +73,11 @@ public class LgBulkerApplication implements ApplicationRunner {
       if (isFileMakerMode) {
         ctx.getBean(TrueFileJsonMakerRunner.class).run(ctx.getBean(ApplicationArguments.class));
       }
+
+      if (isFileMakerMdePng) {
+        ctx.getBean(TrueFileJsonMakerRunnerWithPng.class).run(ctx.getBean(ApplicationArguments.class));
+      }
+
     } // 메일.파일json 읽어 -> 처리 -> 검색엔진에 색인처리
     else {
       app.run(args);
