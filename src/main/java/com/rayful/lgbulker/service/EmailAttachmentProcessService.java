@@ -68,6 +68,7 @@ public class EmailAttachmentProcessService {
 //          System.out.println("본문추출3: " + emailData.get("attach_body"));
         }
       }
+
       resultMapList.add(emailData);
     }
 
@@ -327,6 +328,8 @@ public class EmailAttachmentProcessService {
           while ((line = reader.readLine()) != null) {
             response.append(line);
           }
+
+//          log.info("==== ocr response : {} ==================", response);
           return "[[IMAGE TEXT : " + parseOcrTextFromResponse(response.toString()) + "]]";
         }
       } else {
@@ -344,6 +347,11 @@ public class EmailAttachmentProcessService {
    *  ocr api 호출 시 리턴 받은 response를 파싱하여 문자열로 리턴
    */
   private static String parseOcrTextFromResponse(String jsonResponse) {
+
+    if("{}".equals(jsonResponse)) {
+      return "";
+    }
+
     StringBuilder extractedText = new StringBuilder();
     try {
       JsonObject obj = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -407,6 +415,5 @@ public class EmailAttachmentProcessService {
     ImageIO.write(image, "jpg", jpgFile);
     return jpgFile;
   }
-
 
 }
