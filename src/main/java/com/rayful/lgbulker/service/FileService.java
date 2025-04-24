@@ -12,7 +12,9 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+
 
 @Slf4j
 @Service
@@ -30,7 +32,6 @@ public class FileService {
     int idx = fileName.lastIndexOf('.');
     return (idx != -1) ? fileName.substring(idx) : "";
   }
-
 
 
   //압축파일 풀기
@@ -237,6 +238,12 @@ public class FileService {
     List<LGFileMailVO> totalResult = new ArrayList<>();
 
     for (LGFileMailVO vo : result) {
+
+      log.info("-----------------------");
+      log.info("LGFileMailVO : {}", vo.toString());
+      log.info("-----------------------");
+
+
       String attachPath = vo.getAttach_path();
       String emid = vo.getEm_id();
       String originalKey = vo.getKey();
@@ -272,12 +279,78 @@ public class FileService {
         continue;
       }
 
-      try (ZipInputStream zis = new ZipInputStream(new FileInputStream(attachFile))) {
-        File tempDir = new File(attachFile.getParent(), attachFile.getName() + "_unzipped");
-        if (!tempDir.exists()) tempDir.mkdirs();
+      net.lingala.zip4j.ZipFile zipFile1 = new net.lingala.zip4j.ZipFile(attachFile);
+      if (zipFile1.isEncrypted()) {
+        log.info("압호화된 zip 파일입니다 {}", zipFile1.getFile());
 
-        ZipEntry entry;
-        while ((entry = zis.getNextEntry()) != null) {
+      } else {
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(attachFile))) {
+
+
+          File tempDir = new File(attachFile.getParent(), attachFile.getName() + "_unzipped");
+          if (!tempDir.exists()) tempDir.mkdirs();
+
+          ZipEntry entry;
+          while (true) {
+            try {
+              entry = zis.getNextEntry();
+              if (entry == null) break;
+            } catch (IOException e) {
+              log.info("암호화된 파일이거나 손상된 entry 건너뜀 : ", e.getMessage());
+              continue;
+            }
+
+            if (entry.isDirectory()) continue;
+
+            File outFile = new File(tempDir, entry.getName());
+            outFile.getParentFile().mkdirs();
+
+            try (FileOutputStream fos = new FileOutputStream(outFile)) {
+              byte[] buffer = new byte[4096];
+              int len;
+              while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+              }
+            } catch (IOException e) {
+              //파일저장 실패시 해당 entry 스킵
+              log.info("파일저장 실패 : ", outFile.getName());
+            }
+
+            if (getFileExtension(outFile.getName()).equalsIgnoreCase(".zip")) {
+              LGFileMailVO nestedVO = LGFileMailVO
+                      .builder()
+                      .em_id(emid)
+                      .attach_path(outFile.getAbsolutePath())
+                      .email(vo.getEmail())
+                      .key(originalKey)
+                      .build();
+
+              List<LGFileMailVO> nestedList = Collections.singletonList(nestedVO);
+              List<LGFileMailVO> extracted = checkFile_Unzip_if_Zipfile(nestedList);
+
+              for (LGFileMailVO extractedVO : extracted) {
+                String newKey = originalKey + "_" + fileIndex.getAndIncrement();
+                extractedVO.setKey(newKey);
+                extractedVO.setAttach_id(newKey);
+                extractedVO.setAttach_parent(attachPath);
+                extractedVO.setFrom_zipfile("Y");
+                totalResult.add(extractedVO);
+              }
+
+            } else {
+              LGFileMailVO newVO = createVOFromFile(vo, outFile, emid, 0, "Y", "Y");
+              String newKey = originalKey + "_" + fileIndex.getAndIncrement();
+              newVO.setKey(newKey);
+              newVO.setAttach_id(newKey);
+              newVO.setAttach_parent(attachPath);
+              newVO.setFrom_zipfile("Y");
+              totalResult.add(newVO);
+            }
+          }
+
+
+        /* while ((entry = zis.getNextEntry()) != null) {
           if (entry.isDirectory()) continue;
 
           File outFile = new File(tempDir, entry.getName());
@@ -322,10 +395,12 @@ public class FileService {
             newVO.setFrom_zipfile("Y");
             totalResult.add(newVO);
           }
+        }*/
+        } catch (IOException e) {
+          System.err.println("ZIP 해제 실패: " + attachFile.getAbsolutePath());
+          e.printStackTrace();
         }
-      } catch (IOException e) {
-        System.err.println("ZIP 해제 실패: " + attachFile.getAbsolutePath());
-        e.printStackTrace();
+
       }
     }
 
