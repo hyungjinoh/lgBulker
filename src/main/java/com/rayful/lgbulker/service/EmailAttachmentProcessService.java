@@ -122,7 +122,7 @@ public class EmailAttachmentProcessService {
       File contentFile = new File(outputDir, "content.txt");
 
       // 사이냅필터 사용시 옵션 -ei를 주어 이미지까지 추출...
-      ProcessBuilder processBuilder = new ProcessBuilder(EXE_PATH, "-ei", IMAGE_OUTPUT_PATH + "/" + emId + "_" + attachId , filePath);
+      ProcessBuilder processBuilder = new ProcessBuilder(EXE_PATH, "-O", "-ei", IMAGE_OUTPUT_PATH + "/" + emId + "_" + attachId , filePath);
       processBuilder.redirectErrorStream(true); // 에러 출력도 통합
       Process process = processBuilder.start();
 
