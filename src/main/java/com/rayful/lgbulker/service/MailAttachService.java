@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.logging.log4j.core.util.FileUtils.getFileExtension;
 
 @Slf4j
 @Service
@@ -86,6 +85,7 @@ public class MailAttachService {
 
       Map<String, LGEmailVo> mailMap = mapEmailsByGuid(emails); // 고유한 MailGUID만 뽑아 별도보관 (모든 이메일정보 포함)
 
+      log.info("emails : {}, files : {}", emails.size(), files.size());
       /***
        *  // 결과타입M : 모든 메일 정보 포함(첨부파일 정보 없앰)
        *  // 결과타입F : 파일-메일 매치된것만 포함
@@ -98,8 +98,14 @@ public class MailAttachService {
       List<LGFileMailVO> resultListZipfile = getList_With_Zipfile(resultListF);
 
       List<LGFileMailVO> resultListNormalFile = resultListF.stream()
-                                                   .filter(vo -> resultListZipfile.stream().noneMatch(c -> c.getKey().equals(vo.getKey())))
-                                                   .collect(Collectors.toList());
+              .filter(vo -> resultListZipfile.stream().noneMatch(c -> c.getKey().equals(vo.getKey())))
+              .collect(Collectors.toList());
+
+
+      log.info("-----------------------");
+      log.info("resultListZipfile : {}", resultListZipfile.toString());
+      log.info("-----------------------");
+
 
       //첨부파일만 있는것 압축풀어, 일반 파일들로 구성후  일반파일 목록에 추가
       List<LGFileMailVO> unzippedFromZipfile = fileService.checkFile_Unzip_if_Zipfile(resultListZipfile);
@@ -139,23 +145,48 @@ public class MailAttachService {
        */
       List<LGFileMailVO> finalResultList = new ArrayList<>();
       finalResultList.addAll(resultListAll);
-      finalResultList.addAll(noBodyLinkList);
+//      finalResultList.addAll(noBodyLinkList);
       finalResultList.addAll(yesBodyLinkList);
       finalResultList.addAll(linkRemovedList);
       finalResultList.addAll(linkRemovedList_With_Zip_unzipped);
 
+      log.info("resultListAll : {}", resultListAll.size());
+      log.info("yesBodyLinkList : {}", yesBodyLinkList.size());
+      log.info("noBodyLinkList : {}", noBodyLinkList.size());
+      log.info("linkRemovedList : {}", linkRemovedList.size());
+      log.info("finalResultList : {}", finalResultList.size());
       /*************************************************
        * 리스트를 맵으로 변환, 서차장이 파일에 대한 텍스트 추출 및 OCR 처리 하는 부분사용하기 위한 변환
        ************************************************/
       List<Map<String, Object>> convertedMapList = convertToMapList(finalResultList);
+      List<Map<String, Object>> convertedToMapListWithoutGif = new ArrayList<>();
 
-      //사이냅 필터처리, 이미지 처리 등등.... 부분  -- 오형진
-//      enrichAttachBodies(convertedMapList);
-//      bulkFileWriter.writeAsBulkJsonFiles(convertedMapList, MERGED_DIR);
+      //gif 파일은 제외.
+      for(Map<String, Object> memberMap : convertedMapList) {
+          String attachName = (String) memberMap.get("attach_name");
+
+          if(attachName == null) {
+            convertedToMapListWithoutGif.add(memberMap);
+          } else if(attachName !=null && !attachName.contains(".gif")) {
+            convertedToMapListWithoutGif.add(memberMap);
+          }
+      }
+
+      log.info("convertedMapList : {}", convertedMapList.size());
+      log.info("convertedToMapListWithoutGif : {}", convertedToMapListWithoutGif.size());
 
 //  서차장...이든TNS OCR API 호출 및 첨부파일ㅇ서 텍스트 추출....
-    List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedMapList);
+      List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedToMapListWithoutGif);
       //벌크파일 생성호출
+
+      for(Map<String, Object> memberMap : convertedMapList) {
+        String attach_body = (String) memberMap.get("attach_body");
+        if(attach_body !=null && attach_body.startsWith("Synap Document Filter")) {
+          memberMap.put("attach_body", "Synap Document Filter Error");
+        }
+      }
+
+
       bulkFileWriter.writeAsBulkJsonFiles(finalMapList, MERGED_DIR);
 
     } catch (Exception e) {
@@ -172,16 +203,16 @@ public class MailAttachService {
   private static List<LGFileMailVO> getList_With_Zipfile(List<LGFileMailVO> inputList) {
     List<LGFileMailVO> resultList = new ArrayList<>();
     for(LGFileMailVO itemVo : inputList) {
-        String attachFile = itemVo.getAttach_path();
+      String attachFile = itemVo.getAttach_path();
 
-        if(!attachFile.isEmpty()) {
-          File file = new File(attachFile);
-          String ext = getFileExtension(file);
+      if(!attachFile.isEmpty()) {
+        File file = new File(attachFile);
+        String ext = FileUtils.getFileExtension(file.getName());
 
-          if(ext.equalsIgnoreCase("zip")) {
-            resultList.add(itemVo);
-          }
+        if(ext.equalsIgnoreCase("zip")) {
+          resultList.add(itemVo);
         }
+      }
     }
     return resultList;
   }
@@ -263,24 +294,24 @@ public class MailAttachService {
         String fileName = file.getName();
 
         LGFileMailVO newVo = LGFileMailVO.builder()
-                                         .key(newKey)
-                                         .attach_id(newAttachId)
-                                         .attach_path(link)
-                                         .attach_name(fileName)
-                                         .attach_exist("Y")
+                .key(newKey)
+                .attach_id(newAttachId)
+                .attach_path(link)
+                .attach_name(fileName)
+                .attach_exist("Y")
 //                                         .from_bodylink("Y")
-                                         .link_yn("Y")
-                                         .attach_body("")               // ✔ 비움
-                                         .attachFile(null)             // ✔ 제외
-                                         .em_id(originalVo.getEm_id())          // 이하 메일 메타데이터 복사
-                                         .subject(originalVo.getSubject())
-                                         .sender(originalVo.getSender())
-                                         .senddtm(originalVo.getSenddtm())
-                                         .receiver(originalVo.getReceiver())
-                                         .idxdtm(originalVo.getIdxdtm())
-                                         .em_body(originalVo.getEm_body())
-                                         .email(originalVo.getEmail())
-                                         .build();
+                .link_yn("Y")
+                .attach_body("")               // ✔ 비움
+                .attachFile(null)             // ✔ 제외
+                .em_id(originalVo.getEm_id())          // 이하 메일 메타데이터 복사
+                .subject(originalVo.getSubject())
+                .sender(originalVo.getSender())
+                .senddtm(originalVo.getSenddtm())
+                .receiver(originalVo.getReceiver())
+                .idxdtm(originalVo.getIdxdtm())
+                .em_body(originalVo.getEm_body())
+                .email(originalVo.getEmail())
+                .build();
 
         total.add(newVo);
       }
@@ -298,7 +329,7 @@ public class MailAttachService {
    * @throws IOException
    */
   private void processBodyLinks(
-              List<LGFileMailVO> inputList, List<LGFileMailVO> yesBodyLinkList, List<LGFileMailVO> noBodyLinkList ) throws Exception {
+          List<LGFileMailVO> inputList, List<LGFileMailVO> yesBodyLinkList, List<LGFileMailVO> noBodyLinkList ) throws Exception {
 
     for (LGFileMailVO vo : inputList) {
 
@@ -460,22 +491,22 @@ public class MailAttachService {
           found = true;
         }
       }
-        // 이미 첨부파일과 매칭된 메일은 스킵
-        if (found) {
-          continue;
-        }
-        // 첨부파일 없는 메일도 처리
-        String key = "unknown_" + mailGuid;
-
-        LGFileMailVO vo = LGFileMailVO.builder()
-                                      .key(key)
-                                      .attachFile(null)
-                                      .email(lgEmailVo)
-                                      .build();
-
-        vo.fillDerivedFields(); // 파생 필드 채움
-        result.add(vo);
+      // 이미 첨부파일과 매칭된 메일은 스킵
+      if (found) {
+        continue;
       }
+      // 첨부파일 없는 메일도 처리
+      String key = "unknown_" + mailGuid;
+
+      LGFileMailVO vo = LGFileMailVO.builder()
+              .key(key)
+              .attachFile(null)
+              .email(lgEmailVo)
+              .build();
+
+      vo.fillDerivedFields(); // 파생 필드 채움
+      result.add(vo);
+    }
 
     return result;
   }
@@ -542,10 +573,10 @@ public class MailAttachService {
 
           // 부모 이메일 찾은경우
           LGFileMailVO vo = LGFileMailVO.builder()
-                                        .key(attach.getFileGUID() + "_" + attach.getMailGUID())
-                                        .attachFile(attach)
-                                        .email(email)
-                                        .build();
+                  .key(attach.getFileGUID() + "_" + attach.getMailGUID())
+                  .attachFile(attach)
+                  .email(email)
+                  .build();
           vo.fillDerivedFields();
           result.add(vo);
         }
@@ -599,9 +630,9 @@ public class MailAttachService {
 
       ///////////////////
       long attachCount = attachList.stream().map(LGFileMailVO::getAttach_id)     // attach_id 추출
-                                   .filter(Objects::nonNull)        // null 값 방지
-                                   .distinct()                      // 고유값으로 필터링
-                                   .count()
+              .filter(Objects::nonNull)        // null 값 방지
+              .distinct()                      // 고유값으로 필터링
+              .count()
               ;                        // 개수 세기
 
 //      log.info("Uniq attach_id 개수: {}", attachCount);
@@ -614,7 +645,7 @@ public class MailAttachService {
 
 //      log.info("Uniq attach_id 목록: {}", uniqueAttachIds);
       List<String> allList = uniqueAttachIds.stream().filter(id -> id != null && !id.isBlank())  // null 또는 공백 문자열 제외
-                                            .collect(Collectors.toList())
+              .collect(Collectors.toList())
               ;
 
       totalAttachIds.addAll(allList);         // 고유 attach_id를 누적시킴 :통계
@@ -638,7 +669,7 @@ public class MailAttachService {
       map.put("from_zipfile", vo.getFrom_zipfile());
       map.put("attach_name", vo.getAttach_name());
       map.put("attach_body", vo.getAttach_body());
-      map.put("attach_exist", vo.getAttach_exist());
+//      map.put("attach_exist", vo.getAttach_exist());
       map.put("link_yn", vo.getLink_yn());
       map.put("em_id", vo.getEm_id());
       map.put("subject", vo.getSubject());
@@ -646,8 +677,18 @@ public class MailAttachService {
       map.put("senddtm", vo.getSenddtm());
       map.put("receiver", vo.getReceiver());
       map.put("idxdtm", vo.getIdxdtm());
-      map.put("em_body", vo.getEm_body());
+      map.put("em_body", Utils.removeHtmlTag(vo.getEm_body()));  // body에서 html 제거
       map.put("bodyLinks", vo.getBodyLinks() != null ? vo.getBodyLinks() : new ArrayList<>());
+
+//      첨부존재를 별도로 세팅 -- 관리화면에서 오류발생하였음
+      String attach_name = vo.getAttach_name();
+      String attach_path = vo.getAttach_path();
+      if((attach_name!=null && !attach_name.isEmpty()) && (attach_path!=null && !attach_path.isEmpty())) {
+        map.put("attach_exist", "Y");
+      } else {
+        map.put("attach_exist", "N");
+      }
+
 
       // nested VO 처리 (null 체크 포함)
       if (vo.getAttachFile() != null) {
@@ -657,6 +698,16 @@ public class MailAttachService {
       }
 
       if (vo.getEmail() != null) {
+        //email.sendtime 형식변환
+
+        LGEmailVo lgEmailVo = vo.getEmail();
+        String email_sendtime = lgEmailVo.getMailSendTime();
+
+        if(email_sendtime!=null && !email_sendtime.isEmpty() && email_sendtime.equals("")) {
+          lgEmailVo.setMailSendTime(Utils.convertDateFormat(email_sendtime));
+        } else {
+          lgEmailVo.setMailSendTime(null);
+        }
         map.put("email", vo.getEmail());
 
 //        map.put("email_mailGUID", vo.getEmail().getMailGUID());
@@ -726,9 +777,4 @@ public class MailAttachService {
       cids.add("cid:" + matcher.group(1));
     }
   }
-
-
-
-
-
 }
