@@ -76,7 +76,7 @@ public class MailAttachService {
   /***
    * 서비스 클래스의 메인로직
    */
-  public void load() {
+  public void load(String indexDtm) {
     try {
 
       // 데이터 로드시작
@@ -175,7 +175,7 @@ public class MailAttachService {
       log.info("convertedMapList : {}", convertedMapList.size());
       log.info("convertedToMapListWithoutGif : {}", convertedToMapListWithoutGif.size());
 
-//  서차장...이든TNS OCR API 호출 및 첨부파일ㅇ서 텍스트 추출....
+//  서차장...이든TNS OCR API 호출 및 첨부파일 에서 텍스트 추출....
       List<Map<String, Object>> finalMapList = emailAttachmentProcessService.processEmailAttachments(convertedToMapListWithoutGif);
       //벌크파일 생성호출
 
@@ -184,6 +184,9 @@ public class MailAttachService {
         if(attach_body !=null && attach_body.startsWith("Synap Document Filter")) {
           memberMap.put("attach_body", "Synap Document Filter Error");
         }
+
+        //indexDtm 저장
+        memberMap.put("idxdtm", indexDtm);
       }
 
 
@@ -411,7 +414,6 @@ public class MailAttachService {
         if(!fname.isEmpty()) {
           largesizeFilenames.add(fname);
         }
-
       }
 
       // 이미지 + 대용량 첨부 : 두개의 리스트 머지

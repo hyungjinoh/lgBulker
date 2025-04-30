@@ -121,8 +121,8 @@ public class LGEmailVo {
   @JsonProperty("Mail_SrcName")
   private String mailSrcName;
 
-  @JsonProperty("Mail_AbnormalNested")
-  private List<MailAbnormalNested> mailAbnormalNested;
+//  @JsonProperty("Mail_AbnormalNested")
+//  private List<MailAbnormalNested> mailAbnormalNested;
 
   @JsonProperty("Mail_DID")
   private String mailDID;

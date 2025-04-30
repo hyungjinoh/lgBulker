@@ -12,12 +12,11 @@ import java.nio.file.*;
 import java.util.*;
 
 @Slf4j
-@Component
 public class TrueFileJsonMakerRunner {
 
     public void run(ApplicationArguments args) {
         try {
-            String inputDirPath = args.getOptionValues("input").get(0); // 디렉토리 경로
+            String inputDirPath = args.getOptionValues("input").get(0);
             Path inputDir = Paths.get(inputDirPath);
 
             if (!Files.exists(inputDir) || !Files.isDirectory(inputDir)) {

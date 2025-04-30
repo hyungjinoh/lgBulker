@@ -5,17 +5,27 @@ spring:
     application:
         name: lg
     datasource:
-        url: jdbc:mysql://192.168.14.112:3306/movies
+        url: jdbc:mysql://122.199.202.101:3306/lgcns_admin
         username: root
         password: pass123#
         driver-class-name: com.mysql.cj.jdbc.Driver
 
 
 mybatis:
-    mapper-locations: classpath:mapper/*.xml
+    mapper-locations: classpath:mappers/*.xml
     type-handlers-package: com.rayful.lgpoc.gathering.util
+    type-aliases-package: com.rayful.lgbulker.entity
     configuration:
         map-underscore-to-camel-case: true
+
+sftp:
+    host: 192.168.56.111
+    port: 22
+    username: kevin
+    password: pass123#
+    remote-directory: /data/lgpoc/attachments
+    local-directory: /data/poc/bulker/attachments
+    cron: "0 0/10 * * * *"  # 10분마다
 
 logging:
     level:
@@ -42,19 +52,20 @@ app:
 
     file:
         timestamp: /data/poc/bulker/timestamp/last_executed.txt
+        lock: /data/poc/bulker/lock/bulker.lck
     bulk:
         size: 100
 
 elasticsearch:
-#        bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
-#        idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
-        bulk_idx_url: http://192.168.14.112:9200/idx_email/_bulk
-        idx_refresh: http://192.168.14.112:9200/idx_email/_refresh
+        bulk_idx_url: http://122.199.202.101:9200/idx_email/_bulk
+        idx_refresh: http://122.199.202.101:9200/idx_email/_refresh
+#        bulk_idx_url: http://192.168.14.112:9200/idx_email/_bulk
+#        idx_refresh: http://192.168.14.112:9200/idx_email/_refresh
         auth: elastic:elastic
 ocr:
     edentns:
-        #ocr_api_url: https://ocr.edentns.ai/document/general
-        ocr_api_url: http://192.168.14.111:8000/document/general
+        ocr_api_url: https://ocr.edentns.ai/document/general
+#        ocr_api_url: http://192.168.14.111:8000/document/general
     output_path:
         image: /data/poc/bulker/output/synap/image
         text: /data/poc/bulker/output/synap/text

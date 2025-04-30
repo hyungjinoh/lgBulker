@@ -4,18 +4,34 @@ spring:
         banner-mode: off
     application:
         name: lg
+#    datasource:
+#        url: jdbc:mysql://122.199.202.100:13306/movies
+#        username: root
+#        password: pass123#
+#        driver-class-name: com.mysql.cj.jdbc.Driver
     datasource:
-        url: jdbc:mysql://122.199.202.100:13306/movies
+        url: jdbc:mysql://122.199.202.101:3306/lgcns_admin
         username: root
         password: pass123#
         driver-class-name: com.mysql.cj.jdbc.Driver
 
 
 mybatis:
-    mapper-locations: classpath:mapper/*.xml
+    mapper-locations: classpath:mappers/*.xml
     type-handlers-package: com.rayful.lgpoc.gathering.util
+    type-aliases-package: com.rayful.lgbulker.entity
     configuration:
         map-underscore-to-camel-case: true
+
+#sftp:
+#    host: 192.168.56.111
+#    port: 22
+#    username: kevin
+#    password: pass123#
+#    remote-directory: /data/lgpoc/attachments
+#    local-directory: /data/poc/bulker/attachments
+#    cron: "0 0/10 * * * *"  # 10분마다
+
 
 logging:
     level:
@@ -43,6 +59,7 @@ app:
 
     file:
         timestamp: D:\1.data_poc\timestamp\last_executed.txt
+        lock: D:\1.data_poc\lock\bulker.lck
     bulk:
         size: 100
 

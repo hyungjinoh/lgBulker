@@ -2,16 +2,15 @@
 1. 외부프로파일 사용하도록 설정 : 별도경로에 파일복사후 자바실행시 사용.
    java -jar myapp.jar --spring.config.location=file:./config/application-prod.yml
 
-2. es에 저장된 컨텐츠의 날짜 형식 날짜형식변환 필요한지 확인 (자바코드에선 변환되도록 로직 추가하였음.)
-    "2025-03-28T15:25:19"
-
-3. 로컬pc 작업경로
+. 로컬pc 작업경로
     D:\1.data_poc
                 \input
                 \output
                 \logs
                 \sampleJson\attach     -- elm에서 다운로드 받은 첨부파일등 (ppt)및 이미지 파일 저장됨
                 \synap_v4              -- 윈도우즈용 사이냅필터.
+                \timestamp
+                \lock
 
 4. 프로그램 실행방법
     가. 비정상 json --> 정상 json으로 변환코드
@@ -36,6 +35,34 @@ OCR API 호출 실패 (HTTP 504)
 OCR API 호출 실패 (HTTP 504)
 OCR API 호출 실패 (HTTP 504)
 OCR API 호출 실패 (HTTP 504)
+
+
+6. 로그저장경로
+create table file_metadata
+(
+    id                bigint auto_increment
+        primary key,
+    file_guid         varchar(255) null,
+    file_name         varchar(255) null,
+    file_size         int          null,
+    mail_guid         varchar(255) null,
+    file_content_path text         null,
+    file_time         datetime     null,
+    error_code        varchar(10)  null,
+    error_message     text         null
+);
+
+7. 경로생성스크립트
+mkdir -p /data/poc/bulker/bin
+mkdir -p /data/poc/bulker/config
+mkdir -p /data/poc/bulker/input
+mkdir -p /data/poc/bulker/lib
+mkdir -p /data/poc/bulker/lock
+mkdir -p /data/poc/bulker/log
+mkdir -p /data/poc/bulker/output
+mkdir -p /data/poc/bulker/synap
+mkdir -p /data/poc/bulker/timestamp
+
 
 
 
@@ -74,8 +101,12 @@ OCR API 호출 실패 (HTTP 504)
       finalResultList.addAll(linkRemovedList);
       finalResultList.addAll(linkRemovedList_With_Zip_unzipped);
 
-
-
+7. Mybatis 를 통한  이미지 파일 OCR 처리요청시 에러발생시 DB테이블에 에러입력
+    * FileMetadataMapperTest.java   :  스프링컨텍스트 전체를 테스트하지 않고 Mybatis만 테스트, active profile : test,
+                        테스트 데이터가 DB에 반영되도록 @RollBack(false) 사용 등
+    * TestMybatisConfig.java
+            ==> Invalid bound statement 에러 발생.
+            ==> 해결 : SqlSessionFactoryBean 을 직접생성하여, mybatis-config.xml 을 직접지정함.
 
 
 

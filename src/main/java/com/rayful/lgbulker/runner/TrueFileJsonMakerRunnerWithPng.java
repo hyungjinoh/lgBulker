@@ -2,6 +2,7 @@ package com.rayful.lgbulker.runner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -13,18 +14,17 @@ import java.nio.file.*;
 import java.util.*;
 
 @Slf4j
-@Component
-public class TrueFileJsonMakerRunnerWithPng implements ApplicationRunner {
+public class TrueFileJsonMakerRunnerWithPng  {
 
     public void run(ApplicationArguments args) {
         try {
-            List<String> inputValues =args.getOptionValues("input");
-            if(inputValues == null || inputValues.isEmpty()) {
+            List<String> inputValues = args.getOptionValues("input");
+            if (inputValues == null || inputValues.isEmpty()) {
                 log.error("No input file specified.  --input=dir_path를 포함시키세요");
                 return;
             }
 
-            String inputDirPath = args.getOptionValues("input").get(0); // 디렉토리 경로
+            String inputDirPath = args.getOptionValues("input").get(0);
             Path inputDir = Paths.get(inputDirPath);
 
             if (!Files.exists(inputDir) || !Files.isDirectory(inputDir)) {

@@ -8,14 +8,17 @@ import com.rayful.lgbulker.service.IndexService;
 import com.rayful.lgbulker.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +30,7 @@ import static com.rayful.lgbulker.util.FileUtils.deleteDirectoryRecursively;
 @Slf4j
 @SpringBootApplication
 @RequiredArgsConstructor
+@MapperScan(basePackages = "com.rayful.lgbulker.mapper")
 public class LgBulkerApplication implements ApplicationRunner {
 
   private final MailAttachService mailAttachService;
@@ -41,6 +45,10 @@ public class LgBulkerApplication implements ApplicationRunner {
 
   @Value("${app.file.timestamp}")
   private String TIMESTAMP_FILE;
+
+  @Value("${app.file.lock}")
+  private String LOCK_FILE;
+
   @Value("${app.paths.input.raw_emails}")
   private String RAWEMAILS_DIR;
   @Value("${app.paths.input.emails}")
@@ -53,38 +61,39 @@ public class LgBulkerApplication implements ApplicationRunner {
     SpringApplication app = new SpringApplication(LgBulkerApplication.class);
     app.setWebApplicationType(WebApplicationType.NONE);
 
-    boolean isEmailMakerMode = Arrays.stream(args)
-            .anyMatch(arg -> arg.equalsIgnoreCase("--mode=emailmaker"));
+    boolean isEmailMakerMode = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--mode=emailmaker"));
+    boolean isFileMakerMode = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemaker"));
+    boolean isFileMakerModePng = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemakerpng"));
+    boolean isSftpMode = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--mode=sftp"));
 
-    boolean isFileMakerMode = Arrays.stream(args)
-            .anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemaker"));
-
-    boolean isFileMakerMdePng = Arrays.stream(args)
-            .anyMatch(arg -> arg.equalsIgnoreCase("--mode=filemakerpng"));
-
-    // 이메일|파일의 원본소스파일이 비정상json -> 정상 json 형식으로 가공하는 코드 실행, LgBulkerApplication_emailMaker, LgBulkerApplication_fileMaker
-    if (isEmailMakerMode || isFileMakerMode || isFileMakerMdePng) {
+    if (isEmailMakerMode || isFileMakerMode || isFileMakerModePng) {
       var ctx = app.run(args);
 
+      ApplicationArguments appArgs = ctx.getBean(ApplicationArguments.class);
+
       if (isEmailMakerMode) {
-        ctx.getBean(TrueEmailJsonMakerRunner.class).run(ctx.getBean(ApplicationArguments.class));
+        new TrueEmailJsonMakerRunner().run(appArgs);
       }
 
       if (isFileMakerMode) {
-        ctx.getBean(TrueFileJsonMakerRunner.class).run(ctx.getBean(ApplicationArguments.class));
+        new TrueFileJsonMakerRunner().run(appArgs);
       }
 
-      if (isFileMakerMdePng) {
-        ctx.getBean(TrueFileJsonMakerRunnerWithPng.class).run(ctx.getBean(ApplicationArguments.class));
+      if (isFileMakerModePng) {
+        new TrueFileJsonMakerRunnerWithPng().run(appArgs);
       }
 
-    } // 메일.파일json 읽어 -> 처리 -> 검색엔진에 색인처리
-    else {
+      System.exit(0);
+    } else if (isSftpMode) {
+      ConfigurableApplicationContext ctx = app.run(args);
+      log.info("✅ SFTP mode started. Waiting for scheduled transfers...");
+      ctx.getBean(com.rayful.lgbulker.sftp.SftpScheduler.class);
+    } else {
       app.run(args);
+      System.exit(0);
     }
-
-    System.exit(0);
   }
+
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
@@ -93,26 +102,51 @@ public class LgBulkerApplication implements ApplicationRunner {
     log.info(" Bulker Start");
     log.info("------------------------------------------");
 
+    // ✅ 현재 시간 파일로 기록
+    String indexDtm = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    Files.write(Paths.get(TIMESTAMP_FILE), indexDtm.getBytes(StandardCharsets.UTF_8));
+    log.info("⏱️ Timestamp saved to {}: {}", TIMESTAMP_FILE, indexDtm);
+
+
     List<String> indexModes = args.getOptionValues("indexmode");
     if (indexModes != null && !indexModes.isEmpty()) {
       String mode = indexModes.get(0).toLowerCase();
 
+
+      // ✅ LOCK 파일 경로 처리
+      Path lockPath = Paths.get(LOCK_FILE);
       if ("all".equals(mode) || "inc".equals(mode)) {
-        log.info("====================데이터 로드 시작================");
-        clearWorkingDir();
 
-        mailAttachService.load();
-        log.info("====================데이터 로드 완료===============");
+        if (Files.exists(lockPath)) {
+          log.warn("🚫 LOCK 파일이 존재합니다. 중복 실행 방지를 위해 프로그램을 종료합니다. ({})", LOCK_FILE);
+          System.exit(1);
+        }
 
-        Thread.sleep(2000);
-        log.info("====================bulk file 생성 시작================");
-        mailAttachService.createBulkFiles();
-        log.info("====================bulk file 생성완료 ================");
+        // ✅ LOCK 파일 생성
+        Files.createFile(lockPath);
+        log.info("🔒 LOCK 파일 생성됨: {}", LOCK_FILE);
 
-        Thread.sleep(2000);
-        log.info("====================ES에 색인요청 시작================");
-        indexService.doIndexing();
-        log.info("====================ES에 색인요청 완료 ================");
+        try {
+          log.info("====================데이터 로드 시작================");
+          clearWorkingDir();
+
+          mailAttachService.load(indexDtm);
+          log.info("====================데이터 로드 완료===============");
+
+          Thread.sleep(2000);
+          log.info("====================bulk file 생성 시작================");
+          mailAttachService.createBulkFiles();
+          log.info("====================bulk file 생성완료 ================");
+
+          Thread.sleep(2000);
+          log.info("====================ES에 색인요청 시작================");
+          indexService.doIndexing();
+          log.info("====================ES에 색인요청 완료 ================");
+        } finally {
+          // ✅ LOCK 파일 삭제
+          Files.deleteIfExists(lockPath);
+          log.info("🔓 LOCK 파일 삭제됨: {}", LOCK_FILE);
+        }
       }
     }
 

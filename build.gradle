@@ -20,8 +20,10 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+
 	// 테스트 코드용
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
@@ -39,17 +41,23 @@ dependencies {
 
 	implementation 'org.jsoup:jsoup:1.15.3' // 버전은 최신으로
 
+	implementation 'mysql:mysql-connector-java:8.0.33' // 올바른 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
-	implementation 'mysql:mysql-connector-java:8.0.33' // 올바른 의존성
+	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
 
 	implementation 'org.jsoup:jsoup:1.16.1' // 버전은 최신으로
-
 	implementation 'net.lingala.zip4j:zip4j:2.11.5' // zip파일 암호여부
-
 	implementation 'com.sun.mail:javax.mail:1.6.2'  //MIME Check
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+//sftp를 통한 파일복사
+	implementation 'org.springframework.boot:spring-boot-starter-integration'
+	implementation 'org.springframework.integration:spring-integration-sftp'
+	implementation 'com.jcraft:jsch:0.1.55'
 
 	// ✅ LGEmail 양식테스트
 	testImplementation 'com.sun.mail:javax.mail:1.6.2'

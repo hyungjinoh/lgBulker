@@ -12,7 +12,6 @@ import java.nio.file.*;
 import java.util.*;
 
 @Slf4j
-@Component
 public class TrueEmailJsonMakerRunner {
 
     public void run(ApplicationArguments args) {
@@ -35,7 +34,6 @@ public class TrueEmailJsonMakerRunner {
             log.error("⚠️ 이메일 JSON 처리 중 오류 발생", e);
         }
     }
-
     private void processSingleJsonFile(File inputFile) {
         try {
             String baseName = inputFile.getName().replaceAll("\\.json$", "");

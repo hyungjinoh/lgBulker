@@ -45,12 +45,26 @@ public class LargeSizeFileDownloadService {
         HttpResponse<String> firstResponse = client.send(firstRequest, HttpResponse.BodyHandlers.ofString());
 
         // 세션 쿠키 추출
-        String jsessionId = firstResponse.headers()
-                .allValues("set-cookie").stream()
-                .filter(h -> h.contains("JSESSIONID"))
-                .findFirst()
-                .map(cookie -> cookie.split(";")[0].split("=")[1])
-                .orElseThrow(() -> new RuntimeException("JSESSIONID 쿠키가 없습니다."));
+//        String jsessionId = firstResponse.headers()
+//                .allValues("set-cookie").stream()
+//                .filter(h -> h.contains("JSESSIONID"))
+//                .findFirst()
+//                .map(cookie -> cookie.split(";")[0].split("=")[1])
+//                .orElseThrow(() -> new RuntimeException("JSESSIONID 쿠키가 없습니다."));
+
+        // 세션 쿠키 추출
+        Optional<String> jsessionIdOpt = firstResponse.headers()
+                                                      .allValues("set-cookie").stream()
+                                                      .filter(h -> h.contains("JSESSIONID"))
+                                                      .findFirst();
+
+        if (jsessionIdOpt.isEmpty()) {
+            System.out.println("⚠️ JSESSIONID 쿠키가 없습니다. 스킵합니다: " + firstUrl);
+            return "";
+        }
+
+        String jsessionId = jsessionIdOpt.get().split(";")[0].split("=")[1];
+
 
         // Step 2: HTML 본문에서 실제 다운로드 링크 추출
         Document doc = Jsoup.parse(firstResponse.body());
