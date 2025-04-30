@@ -96,6 +96,7 @@ public class EmailAttachmentProcessService {
                   ;
 
           fileMetadataMapper.insertFileMetadata(fileMetadata);
+
         } else {
           log.warn("attachFile 정보가 LGFileVO 타입이 아닙니다. em_id: {}, attach_id: {}", emailData.get("em_id"), emailData.get("attach_id"));
         }
@@ -410,6 +411,7 @@ public class EmailAttachmentProcessService {
         if (attachFileObj instanceof LGFileVO) {
           LGFileVO lgFileVO = (LGFileVO) attachFileObj;
           String mailGuid = lgFileVO.getMailGUID();
+          String fileGuid = lgFileVO.getFileGUID();
 
           // ✅ 실패한 파일 정보를 DB에 insert
 //          fileMetadataMapper.insertFileMetadata(FileMetadata
@@ -423,7 +425,7 @@ public class EmailAttachmentProcessService {
 //                  .errorCode(error.getCode())
 //                  .errorMessage(error.getMessage())
 //                  .build());
-          logFailureToDB(file, imagePath, ocrErrorCode, mailGuid);
+          logFailureToDB(file, imagePath, ocrErrorCode, fileGuid, mailGuid);
 
         }
         return "[OCR_ERROR]";
@@ -438,6 +440,7 @@ public class EmailAttachmentProcessService {
       if (attachFileObj instanceof LGFileVO) {
         LGFileVO lgFileVO = (LGFileVO) attachFileObj;
         String mailGuid = lgFileVO.getMailGUID();
+        String fileGuid = lgFileVO.getFileGUID();
 
 //      fileMetadataMapper.insertFileMetadata(FileMetadata
 //              .builder()
@@ -451,7 +454,7 @@ public class EmailAttachmentProcessService {
 //              .errorMessage(error.getMessage())
 //              .build());
 
-        logFailureToDB(file, imagePath, ocrErrorCode, mailGuid);
+        logFailureToDB(file, imagePath, ocrErrorCode, fileGuid, mailGuid);
       }
 
       return "[OCR_ERROR]";
@@ -543,11 +546,11 @@ public class EmailAttachmentProcessService {
     }
   }
 
-  private void logFailureToDB(File file, String imagePath, OCRErrorCode errorCode, String mailGuid) {
+  private void logFailureToDB(File file, String imagePath, OCRErrorCode errorCode, String fileGuid, String mailGuid) {
     try {
       fileMetadataMapper.insertFileMetadata(
               FileMetadata.builder()
-                          .fileGuid(UUID.randomUUID().toString())
+                          .fileGuid(fileGuid)
                           .fileName(file.getName())
                           .fileSize(file.exists() ? (int) file.length() : null)
                           .mailGuid(mailGuid)
